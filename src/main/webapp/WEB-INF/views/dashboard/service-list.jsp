@@ -22,7 +22,7 @@
         </div>
         <ul class="sidebar-menu">
             <li><a href="${pageContext.request.contextPath}/dashboard"><i class="bi bi-speedometer2"></i> Tổng quan</a></li>
-            <li><a href="#"><i class="bi bi-calendar-check"></i> Lịch hẹn</a></li>
+            <li><a href="${pageContext.request.contextPath}/admin/appointments"><i class="bi bi-calendar-check"></i> Lịch hẹn</a></li>
             <li><a href="${pageContext.request.contextPath}/admin/pets"><i class="bi bi-heart"></i> Thú cưng</a></li>
             <li><a href="#"><i class="bi bi-receipt"></i> Hóa đơn</a></li>
             <li><a href="${pageContext.request.contextPath}/admin/services" class="active"><i class="bi bi-clipboard2-pulse"></i> Dịch vụ</a></li>

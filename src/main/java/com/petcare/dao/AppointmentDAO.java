@@ -121,4 +121,134 @@ public class AppointmentDAO {
         }
         return list;
     }
+
+    public int countTodayAppointments() {
+        String sql = "SELECT COUNT(*) FROM appointments WHERE DATE(appointment_date) = CURDATE()";
+        try (Connection conn = DBConnection.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public int countPendingAppointments() {
+        String sql = "SELECT COUNT(*) FROM appointments WHERE status = 'PENDING'";
+        try (Connection conn = DBConnection.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public long getMonthlyRevenue() {
+        String sql = "SELECT SUM(ad.price_at_booking) FROM appointment_details ad " +
+                     "JOIN appointments a ON ad.appointment_id = a.id " +
+                     "WHERE a.status = 'COMPLETED' AND MONTH(a.appointment_date) = MONTH(CURDATE()) AND YEAR(a.appointment_date) = YEAR(CURDATE())";
+        try (Connection conn = DBConnection.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            if (rs.next()) {
+                return rs.getLong(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public List<Appointment> getTodayAppointments() {
+        List<Appointment> list = new ArrayList<>();
+        String sql = "SELECT a.*, p.name as pet_name, u.full_name as customer_name, s.name as service_name, ad.price_at_booking " +
+                     "FROM appointments a " +
+                     "JOIN pets p ON a.pet_id = p.id " +
+                     "JOIN users u ON a.customer_id = u.id " +
+                     "JOIN appointment_details ad ON a.id = ad.appointment_id " +
+                     "JOIN services s ON ad.service_id = s.id " +
+                     "WHERE DATE(a.appointment_date) = CURDATE() " +
+                     "ORDER BY a.appointment_date ASC";
+        try (Connection conn = DBConnection.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                Appointment app = new Appointment();
+                app.setId(rs.getInt("id"));
+                app.setCustomerId(rs.getInt("customer_id"));
+                app.setPetId(rs.getInt("pet_id"));
+                app.setStaffId(rs.getInt("staff_id"));
+                if (rs.wasNull()) app.setStaffId(null);
+                app.setAppointmentDate(rs.getTimestamp("appointment_date"));
+                app.setStatus(rs.getString("status"));
+                app.setReason(rs.getString("reason"));
+                app.setDiagnosis(rs.getString("diagnosis"));
+                app.setCreatedAt(rs.getTimestamp("created_at"));
+                app.setCustomerName(rs.getString("customer_name"));
+                app.setPetName(rs.getString("pet_name"));
+                app.setServiceName(rs.getString("service_name"));
+                app.setPriceAtBooking(rs.getBigDecimal("price_at_booking"));
+                list.add(app);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public List<Appointment> getAllAppointments() {
+        List<Appointment> list = new ArrayList<>();
+        String sql = "SELECT a.*, p.name as pet_name, u.full_name as customer_name, s.name as service_name, ad.price_at_booking " +
+                     "FROM appointments a " +
+                     "JOIN pets p ON a.pet_id = p.id " +
+                     "JOIN users u ON a.customer_id = u.id " +
+                     "JOIN appointment_details ad ON a.id = ad.appointment_id " +
+                     "JOIN services s ON ad.service_id = s.id " +
+                     "ORDER BY a.appointment_date DESC";
+        try (Connection conn = DBConnection.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                Appointment app = new Appointment();
+                app.setId(rs.getInt("id"));
+                app.setCustomerId(rs.getInt("customer_id"));
+                app.setPetId(rs.getInt("pet_id"));
+                app.setStaffId(rs.getInt("staff_id"));
+                if (rs.wasNull()) app.setStaffId(null);
+                app.setAppointmentDate(rs.getTimestamp("appointment_date"));
+                app.setStatus(rs.getString("status"));
+                app.setReason(rs.getString("reason"));
+                app.setDiagnosis(rs.getString("diagnosis"));
+                app.setCreatedAt(rs.getTimestamp("created_at"));
+                app.setCustomerName(rs.getString("customer_name"));
+                app.setPetName(rs.getString("pet_name"));
+                app.setServiceName(rs.getString("service_name"));
+                app.setPriceAtBooking(rs.getBigDecimal("price_at_booking"));
+                list.add(app);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public boolean updateStatus(int appointmentId, String status) {
+        String sql = "UPDATE appointments SET status = ? WHERE id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, status);
+            ps.setInt(2, appointmentId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }

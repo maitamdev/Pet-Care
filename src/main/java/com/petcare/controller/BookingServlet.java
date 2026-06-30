@@ -118,8 +118,11 @@ public class BookingServlet extends HttpServlet {
             String timeStr = request.getParameter("time");
             String reason = request.getParameter("reason");
 
-            // Combine date & time into Timestamp
-            String dateTimeStr = dateStr + " " + timeStr + ":00";
+            // Combine date & time into Timestamp robustly
+            if (timeStr != null && timeStr.length() == 5) {
+                timeStr += ":00";
+            }
+            String dateTimeStr = dateStr + " " + timeStr;
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             java.util.Date parsedDate = sdf.parse(dateTimeStr);
             Timestamp appointmentDate = new Timestamp(parsedDate.getTime());

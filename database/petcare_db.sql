@@ -35,8 +35,9 @@ CREATE TABLE IF NOT EXISTS pets (
     breed VARCHAR(50),
     age INT,
     weight DECIMAL(5,2),
+    gender VARCHAR(20),
     image_url VARCHAR(255),
-    medical_history TEXT,
+    notes TEXT,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (customer_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
