@@ -79,7 +79,7 @@ CREATE TABLE IF NOT EXISTS invoices (
     FOREIGN KEY (appointment_id) REFERENCES appointments(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO users (full_name, username, password, role, status) VALUES
+INSERT IGNORE INTO users (full_name, username, password, role, status) VALUES
 ('Administrator', 'admin', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'ADMIN', 1);
 
 INSERT INTO services (name, price, description, status) VALUES

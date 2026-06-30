@@ -1,5 +1,19 @@
 # Build
 target/
+.tools/
+.env.ps1
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.sql.gz
+database/backups/
+uploads/
 *.class
 *.jar
 *.war
