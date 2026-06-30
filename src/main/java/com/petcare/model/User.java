@@ -6,18 +6,25 @@ public class User {
     private String fullName;
     private String username;
     private String password;
+    private String phone;
+    private String email;
+    private String imageUrl;
+    private String specialty;
     private String role;
     private int status;
 
     public User() {
     }
 
-    public User(int id, String fullName, String username, String password,
-                String role, int status) {
+    public User(int id, String fullName, String username, String password, String phone, String email, String imageUrl, String specialty, String role, int status) {
         this.id = id;
         this.fullName = fullName;
         this.username = username;
         this.password = password;
+        this.phone = phone;
+        this.email = email;
+        this.imageUrl = imageUrl;
+        this.specialty = specialty;
         this.role = role;
         this.status = status;
     }
@@ -54,6 +61,38 @@ public class User {
         this.password = password;
     }
 
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+    public String getSpecialty() {
+        return specialty;
+    }
+
+    public void setSpecialty(String specialty) {
+        this.specialty = specialty;
+    }
+
     public String getRole() {
         return role;
     }
@@ -76,6 +115,8 @@ public class User {
                 "id=" + id +
                 ", fullName='" + fullName + '\'' +
                 ", username='" + username + '\'' +
+                ", phone='" + phone + '\'' +
+                ", email='" + email + '\'' +
                 ", role='" + role + '\'' +
                 ", status=" + status +
                 '}';

@@ -21,3 +21,8 @@ desktop.ini
 
 # Logs
 *.log
+
+# Gemini Agents & Skills
+.agents/
+skills-lock.json
+

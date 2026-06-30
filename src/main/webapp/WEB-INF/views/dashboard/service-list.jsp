@@ -1,0 +1,94 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý dịch vụ - PetCare</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/dashboard.css">
+</head>
+<body class="dashboard-body">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="brand-mark"><i class="bi bi-heart-pulse"></i></div>
+            <div class="brand-copy">
+                <strong>PetCare</strong>
+                <span>Clinic admin</span>
+            </div>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="${pageContext.request.contextPath}/dashboard"><i class="bi bi-speedometer2"></i> Tổng quan</a></li>
+            <li><a href="#"><i class="bi bi-calendar-check"></i> Lịch hẹn</a></li>
+            <li><a href="${pageContext.request.contextPath}/admin/pets"><i class="bi bi-heart"></i> Thú cưng</a></li>
+            <li><a href="#"><i class="bi bi-receipt"></i> Hóa đơn</a></li>
+            <li><a href="${pageContext.request.contextPath}/admin/services" class="active"><i class="bi bi-clipboard2-pulse"></i> Dịch vụ</a></li>
+            <c:if test="${sessionScope.user.role == 'ADMIN'}">
+                <li><a href="#"><i class="bi bi-people"></i> Nhân sự</a></li>
+            </c:if>
+            <li><a class="logout-link" href="${pageContext.request.contextPath}/logout"><i class="bi bi-box-arrow-right"></i> Đăng xuất</a></li>
+        </ul>
+    </aside>
+
+    <main class="main-content">
+        <header class="topbar">
+            <div>
+                <h1 class="topbar-title">Quản lý dịch vụ</h1>
+                <p class="topbar-kicker">Bảng giá và mô tả dịch vụ phòng khám</p>
+            </div>
+            <div class="user-profile">
+                <div class="user-avatar"><i class="bi bi-person"></i></div>
+                <span>Xin chào, <strong>${sessionScope.user.fullName}</strong> (${sessionScope.user.role})</span>
+            </div>
+        </header>
+
+        <div class="content-wrapper">
+            <div class="card-panel">
+                <div class="action-bar">
+                    <div>
+                        <h3 class="card-title">Danh sách dịch vụ</h3>
+                        <p class="card-subtitle">Cập nhật dịch vụ, giá tiền và mô tả hiển thị cho nhân viên.</p>
+                    </div>
+                    <a href="${pageContext.request.contextPath}/admin/services/new" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Thêm dịch vụ</a>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Tên dịch vụ</th>
+                                <th>Giá (VNĐ)</th>
+                                <th>Mô tả</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <c:forEach var="item" items="${listServices}">
+                                <tr>
+                                    <td>#${item.id}</td>
+                                    <td><span class="cell-title">${item.name}</span></td>
+                                    <td><strong><fmt:formatNumber value="${item.price}" pattern="#,###"/></strong></td>
+                                    <td>${item.description}</td>
+                                    <td>
+                                        <div class="table-actions">
+                                            <a title="Sửa" href="${pageContext.request.contextPath}/admin/services/edit?id=${item.id}" class="btn btn-warning btn-icon"><i class="bi bi-pencil-square"></i></a>
+                                            <a title="Xóa" href="${pageContext.request.contextPath}/admin/services/delete?id=${item.id}" class="btn btn-danger btn-icon" onclick="return confirm('Bạn có chắc muốn xóa dịch vụ này?');"><i class="bi bi-trash"></i></a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </c:forEach>
+                            <c:if test="${empty listServices}">
+                                <tr><td colspan="5"><div class="empty-state">Chưa có dịch vụ nào.</div></td></tr>
+                            </c:if>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

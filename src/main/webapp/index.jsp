@@ -80,6 +80,9 @@
         <p class="subtitle">Hệ thống quản lý phòng khám thú y</p>
         <div class="status">Project is running!</div>
         <div class="nav-links">
+            <a href="${pageContext.request.contextPath}/login" class="btn-primary" style="background: linear-gradient(135deg, #1976d2, #1565c0);">
+                Đăng nhập hệ thống (Admin/Staff)
+            </a>
             <a href="${pageContext.request.contextPath}/home" class="btn-primary">
                 Trang chủ - Home Page
             </a>
