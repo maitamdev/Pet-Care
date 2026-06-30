@@ -13,8 +13,8 @@ public class DBConnection {
             + "&characterEncoding=UTF-8";
 
     private static final String URL = setting("PETCARE_DB_URL", DEFAULT_URL);
-    private static final String USER = requiredSetting("PETCARE_DB_USER");
-    private static final String PASSWORD = requiredSetting("PETCARE_DB_PASSWORD");
+    private static final String USER = setting("PETCARE_DB_USER", "root");
+    private static final String PASSWORD = setting("PETCARE_DB_PASSWORD", "");
 
     private static String setting(String name, String defaultValue) {
         String value = System.getenv(name);
@@ -22,14 +22,6 @@ public class DBConnection {
             value = System.getProperty(name);
         }
         return value == null || value.isBlank() ? defaultValue : value;
-    }
-
-    private static String requiredSetting(String name) {
-        String value = setting(name, "");
-        if (value.isBlank()) {
-            throw new IllegalStateException("Missing required environment variable: " + name);
-        }
-        return value;
     }
 
     public static Connection getConnection() throws SQLException {
