@@ -56,7 +56,7 @@ public class AdminAppointmentServlet extends HttpServlet {
             return;
         }
 
-        User user = (User) session.getAttribute("User");
+        User user = (User) session.getAttribute("user");
         if ("CUSTOMER".equals(user.getRole())) {
             response.sendRedirect(request.getContextPath() + "/home");
             return;
