@@ -1,10 +1,8 @@
 $ErrorActionPreference = 'Stop'
 $ProjectRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
-$Maven = Join-Path $ProjectRoot '.tools\apache-maven\bin\mvn.cmd'
+$LocalMaven = Join-Path $ProjectRoot '.tools\apache-maven\bin\mvn.cmd'
+$Maven = if (Test-Path $LocalMaven) { $LocalMaven } else { 'mvn' }
 
-if (-not (Test-Path $Maven)) {
-    throw 'Chua co Maven cuc bo. Hay cai Maven hoac khoi phuc thu muc .tools/apache-maven.'
-}
 if (Test-Path (Join-Path $ProjectRoot '.env.ps1')) {
     . (Join-Path $ProjectRoot '.env.ps1')
 } else {
@@ -16,4 +14,4 @@ Start-Job -ScriptBlock {
     Start-Sleep -Seconds 5
     Start-Process 'http://localhost:8080/PetCareClinic/'
 } | Out-Null
-& $Maven tomcat7:run
+& $Maven package tomcat7:run-war

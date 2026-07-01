@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PetCare Clinic</title>
+    <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/assets/images/petcare_logo_icon.png">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -90,7 +91,7 @@
                 Test kết nối Database
             </a>
         </div>
-        <p class="footer-info">Java 17 | Servlet 4.0 | JSP | MySQL 8 | Tomcat 9</p>
+        <p class="footer-info">Java 8 compatible | Servlet 3.0 | JSP | MySQL 8 | Tomcat 7</p>
     </div>
 </body>
 </html>

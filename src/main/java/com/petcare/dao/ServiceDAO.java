@@ -1,11 +1,15 @@
 package com.petcare.dao;
 
-import com.petcare.config.DBConnection;
-import com.petcare.model.Service;
-
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.petcare.config.DBConnection;
+import com.petcare.model.Service;
 
 public class ServiceDAO {
 
@@ -93,5 +97,32 @@ public class ServiceDAO {
             e.printStackTrace();
         }
         return false;
+    }
+    public List<Service> searchServicesByName(String keyword) {
+        List<Service> list = new ArrayList<>();
+        String sql = "SELECT * FROM services WHERE status = 1 AND name LIKE ? ORDER BY id DESC";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, "%" + keyword + "%");
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Service s = new Service();
+                    s.setId(rs.getInt("id"));
+                    s.setName(rs.getString("name"));
+                    s.setPrice(rs.getBigDecimal("price"));
+                    s.setDescription(rs.getString("description"));
+                    s.setStatus(rs.getInt("status"));
+                    s.setCreatedAt(rs.getTimestamp("created_at"));
+                    list.add(s);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return list;
     }
 }

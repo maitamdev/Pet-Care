@@ -6,6 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng nhập - PetCare Clinic</title>
+    <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/assets/images/petcare_logo_icon.png">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css">
     <style>
         .auth-container { display:flex; justify-content:center; align-items:center; min-height:100vh; background:linear-gradient(135deg, #e0f2f1, #80cbc4); }

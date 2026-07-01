@@ -14,7 +14,7 @@ public class DBConnection {
 
     private static final String URL = setting("PETCARE_DB_URL", DEFAULT_URL);
     private static final String USER = setting("PETCARE_DB_USER", "root");
-    private static final String PASSWORD = setting("PETCARE_DB_PASSWORD", "");
+    private static final String PASSWORD = setting("PETCARE_DB_PASSWORD", "123456");
 
     private static String setting(String name, String defaultValue) {
         String value = System.getenv(name);

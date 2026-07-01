@@ -7,6 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý dịch vụ - PetCare</title>
+    <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/assets/images/petcare_logo_icon.png">
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/dashboard.css">
@@ -55,6 +56,42 @@
                     <a href="${pageContext.request.contextPath}/admin/services/new" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Thêm dịch vụ</a>
                 </div>
 
+                <c:if test="${param.success == 'created'}">
+                    <div style="margin-bottom: 16px; padding: 12px 14px; border-radius: 8px; background: #dcfce7; color: #166534; font-weight: 600;">
+                        Thêm dịch vụ thành công.
+                    </div>
+                </c:if>
+
+                <c:if test="${param.success == 'updated'}">
+                    <div style="margin-bottom: 16px; padding: 12px 14px; border-radius: 8px; background: #dcfce7; color: #166534; font-weight: 600;">
+                        Cập nhật dịch vụ thành công.
+                    </div>
+                </c:if>
+
+                <c:if test="${param.success == 'deleted'}">
+                    <div style="margin-bottom: 16px; padding: 12px 14px; border-radius: 8px; background: #dcfce7; color: #166534; font-weight: 600;">
+                        Xóa dịch vụ thành công.
+                    </div>
+                </c:if>
+                <form action="${pageContext.request.contextPath}/admin/services" method="GET" accept-charset="UTF-8"
+                    style="margin-bottom: 16px; display: flex; gap: 10px; align-items: center;">
+                    <input type="text"
+                        name="keyword"
+                        class="form-control"
+                        placeholder="Tìm kiếm dịch vụ theo tên..."
+                        value="<c:out value='${keyword}'/>"
+                        style="max-width: 360px;">
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search"></i> Tìm kiếm
+                    </button>
+
+                    <c:if test="${not empty keyword}">
+                        <a href="${pageContext.request.contextPath}/admin/services" class="btn btn-secondary">
+                            <i class="bi bi-x-circle"></i> Xóa lọc
+                        </a>
+                    </c:if>
+                </form>
                 <div class="table-responsive">
                     <table class="data-table">
                         <thead>

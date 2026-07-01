@@ -6,6 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thêm hoặc sửa dịch vụ - PetCare</title>
+    <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/assets/images/petcare_logo_icon.png">
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/dashboard.css">
@@ -53,8 +54,12 @@
                     </c:choose>
                 </h3>
                 <p class="card-subtitle">Giá nhập theo VNĐ, hệ thống sẽ định dạng lại ở danh sách.</p>
-
-                <form action="${pageContext.request.contextPath}/admin/services/${service != null ? 'update' : 'insert'}" method="POST" style="margin-top:18px;">
+                <c:if test="${not empty error}">
+                    <div style="margin-top: 12px; padding: 12px 14px; border-radius: 8px; background: #fee2e2; color: #991b1b; font-weight: 600;">
+                        ${error}
+                    </div>
+                </c:if>
+                <form action="${pageContext.request.contextPath}/admin/services/${service != null ? 'update' : 'insert'}" method="POST" style="margin-top:18px;" novalidate>
                     <c:if test="${service != null}">
                         <input type="hidden" name="id" value="${service.id}">
                     </c:if>
@@ -66,7 +71,7 @@
 
                     <div class="form-group">
                         <label>Giá (VNĐ) *</label>
-                        <input type="number" name="price" class="form-control" value="<c:out value='${service.price}'/>" min="0" required>
+                        <input type="text" name="price" class="form-control" value="<c:out value='${service.price}'/>" min="0" required>
                     </div>
 
                     <div class="form-group">
