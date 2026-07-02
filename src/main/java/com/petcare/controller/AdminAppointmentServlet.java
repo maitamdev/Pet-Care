@@ -1,8 +1,7 @@
 package com.petcare.controller;
 
-import com.petcare.dao.AppointmentDAO;
-import com.petcare.model.Appointment;
-import com.petcare.model.User;
+import java.io.IOException;
+import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -10,17 +9,22 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.io.IOException;
-import java.util.List;
+
+import com.petcare.dao.AppointmentDAO;
+import com.petcare.dao.InvoiceDAO;
+import com.petcare.model.Appointment;
+import com.petcare.model.User;
 
 @WebServlet({"/admin/appointments", "/admin/appointments/update-status"})
 public class AdminAppointmentServlet extends HttpServlet {
 
     private AppointmentDAO appointmentDAO;
+    private InvoiceDAO invoiceDAO;
 
     @Override
     public void init() {
         appointmentDAO = new AppointmentDAO();
+        invoiceDAO = new InvoiceDAO();
     }
 
     @Override
@@ -69,6 +73,9 @@ public class AdminAppointmentServlet extends HttpServlet {
                 String status = request.getParameter("status");
                 
                 boolean success = appointmentDAO.updateStatus(id, status);
+                if ("COMPLETED".equals(status)) {
+                    invoiceDAO.createInvoiceFromAppointment(id);
+                }
                 if (success) {
                     session.setAttribute("successMessage", "Cập nhật trạng thái lịch hẹn thành công!");
                 } else {

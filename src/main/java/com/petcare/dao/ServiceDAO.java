@@ -98,12 +98,82 @@ public class ServiceDAO {
         }
         return false;
     }
+    public List<Service> getServicesSortedByPrice(String sort) {
+        List<Service> list = new ArrayList<>();
+
+        String sql;
+        if ("price_asc".equals(sort)) {
+            sql = "SELECT * FROM services WHERE status = 1 ORDER BY price ASC";
+        } else if ("price_desc".equals(sort)) {
+            sql = "SELECT * FROM services WHERE status = 1 ORDER BY price DESC";
+        } else {
+            sql = "SELECT * FROM services WHERE status = 1 ORDER BY id DESC";
+        }
+
+        try (Connection conn = DBConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                Service s = new Service();
+                s.setId(rs.getInt("id"));
+                s.setName(rs.getString("name"));
+                s.setPrice(rs.getBigDecimal("price"));
+                s.setDescription(rs.getString("description"));
+                s.setStatus(rs.getInt("status"));
+                s.setCreatedAt(rs.getTimestamp("created_at"));
+                list.add(s);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
     public List<Service> searchServicesByName(String keyword) {
         List<Service> list = new ArrayList<>();
         String sql = "SELECT * FROM services WHERE status = 1 AND name LIKE ? ORDER BY id DESC";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, "%" + keyword + "%");
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Service s = new Service();
+                    s.setId(rs.getInt("id"));
+                    s.setName(rs.getString("name"));
+                    s.setPrice(rs.getBigDecimal("price"));
+                    s.setDescription(rs.getString("description"));
+                    s.setStatus(rs.getInt("status"));
+                    s.setCreatedAt(rs.getTimestamp("created_at"));
+                    list.add(s);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+    public List<Service> searchServicesByNameAndSort(String keyword, String sort) {
+        List<Service> list = new ArrayList<>();
+
+        String orderBy;
+        if ("price_asc".equals(sort)) {
+            orderBy = " ORDER BY price ASC";
+        } else if ("price_desc".equals(sort)) {
+            orderBy = " ORDER BY price DESC";
+        } else {
+            orderBy = " ORDER BY id DESC";
+        }
+
+        String sql = "SELECT * FROM services WHERE status = 1 AND name LIKE ?" + orderBy;
+
+        try (Connection conn = DBConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, "%" + keyword + "%");
 

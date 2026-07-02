@@ -67,17 +67,20 @@ public class ServiceServlet extends HttpServlet {
     private void listServices(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String keyword = fixGetEncoding(request.getParameter("keyword"));
-
+        String sort = request.getParameter("sort");
         List<Service> list;
 
         if (keyword != null && !keyword.trim().isEmpty()) {
-            list = serviceDAO.searchServicesByName(keyword.trim());
+            list = serviceDAO.searchServicesByNameAndSort(keyword.trim(), sort);
+        } else if (sort != null && !sort.trim().isEmpty()) {
+            list = serviceDAO.getServicesSortedByPrice(sort);
         } else {
             list = serviceDAO.getAllServices();
         }
 
         request.setAttribute("listServices", list);
         request.setAttribute("keyword", keyword);
+        request.setAttribute("sort", sort);
         request.getRequestDispatcher("/WEB-INF/views/dashboard/service-list.jsp").forward(request, response);
     }
 
