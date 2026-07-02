@@ -67,76 +67,166 @@
     </style>
     <script>
     function openInvoiceModal() {
+        document.getElementById('invoiceAction').value = 'create';
+        document.getElementById('invoiceId').value = '';
+        document.getElementById('invoiceCustomerName').value = '';
+        document.getElementById('invoicePetName').value = '';
+        document.getElementById('invoiceServiceName').value = '';
+        document.getElementById('invoiceTotalAmount').value = '';
+        document.getElementById('invoicePaymentMethod').value = '';
+        document.getElementById('invoiceStatus').value = 'UNPAID';
+        document.getElementById('invoiceModal').style.display = 'flex';
+    }
+
+    function openEditInvoiceModal(id, customerName, petName, serviceName, totalAmount, paymentMethod, status) {
+        document.getElementById('invoiceAction').value = 'update';
+        document.getElementById('invoiceId').value = id;
+        document.getElementById('invoiceCustomerName').value = customerName || '';
+        document.getElementById('invoicePetName').value = petName || '';
+        document.getElementById('invoiceServiceName').value = serviceName || '';
+        document.getElementById('invoiceTotalAmount').value = totalAmount || '';
+        document.getElementById('invoicePaymentMethod').value = paymentMethod || '';
+        document.getElementById('invoiceStatus').value = status || 'UNPAID';
         document.getElementById('invoiceModal').style.display = 'flex';
     }
 
     function closeInvoiceModal() {
         document.getElementById('invoiceModal').style.display = 'none';
     }
-</script>
+    function openInvoiceDetailModal(id, customerName, petName, serviceName, totalAmount, status, paymentMethod, createdAt) {
+    document.getElementById('detailInvoiceId').innerText = '#HD' + id;
+    document.getElementById('detailCustomerName').innerText = customerName || 'Chưa có';
+    document.getElementById('detailPetName').innerText = petName || 'Chưa có';
+    document.getElementById('detailServiceName').innerText = serviceName || 'Chưa có';
+    document.getElementById('detailTotalAmount').innerText = Number(totalAmount || 0).toLocaleString('vi-VN') + ' đ';
+    document.getElementById('detailStatus').innerText = status || 'UNPAID';
+    document.getElementById('detailPaymentMethod').innerText = paymentMethod || 'Chưa chọn';
+    document.getElementById('detailCreatedAt').innerText = createdAt || '';
+
+    document.getElementById('invoiceDetailModal').style.display = 'flex';
+    }
+
+    function closeInvoiceDetailModal() {
+        document.getElementById('invoiceDetailModal').style.display = 'none';
+    }
+    </script>
 </head>
-<div id="invoiceModal" class="modal-overlay" style="display:none;">
-    <div class="modal-box">
-        <div class="modal-header">
-            <div>
-                <h3>Tạo hóa đơn thủ công</h3>
-                <p>Nhập hóa đơn không gắn với lịch hẹn.</p>
+
+<body class="dashboard-body">
+    <div id="invoiceModal" class="modal-overlay" style="display:none;">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div>
+                    <h3>Tạo hóa đơn thủ công</h3>
+                    <p>Nhập hóa đơn không gắn với lịch hẹn.</p>
+                </div>
+                <button type="button" class="btn btn-secondary btn-icon" onclick="closeInvoiceModal()">
+                    <i class="bi bi-x-lg"></i>
+                </button>
             </div>
-            <button type="button" class="btn btn-secondary btn-icon" onclick="closeInvoiceModal()">
-                <i class="bi bi-x-lg"></i>
-            </button>
+
+            <form action="${pageContext.request.contextPath}/admin/invoices" method="POST">
+                <input type="hidden" name="action" id="invoiceAction" value="create">
+                <input type="hidden" name="id" id="invoiceId">
+                <div class="form-group">
+                    <label>Khách hàng *</label>
+                    <input type="text" name="customerName" id="invoiceCustomerName" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Thú cưng *</label>
+                    <input type="text" name="petName" class="form-control" id="invoicePetName" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Dịch vụ *</label>
+                    <input type="text" name="serviceName" class="form-control" id="invoiceServiceName" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Tổng tiền (VNĐ) *</label>
+                    <input type="number" name="totalAmount" class="form-control" id="invoiceTotalAmount" min="0" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Phương thức thanh toán</label>
+                    <select name="paymentMethod" id="invoicePaymentMethod" class="form-control">
+                        <option value="">Chưa chọn</option>
+                        <option value="CASH">Tiền mặt</option>
+                        <option value="TRANSFER">Chuyển khoản</option>
+                        <option value="CARD">Thẻ</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Trạng thái</label>
+                    <select name="status" id="invoiceStatus" class="form-control">
+                        <option value="UNPAID">Chưa thanh toán</option>
+                        <option value="PAID">Đã thanh toán</option>
+                        <option value="CANCELLED">Đã hủy</option>
+                    </select>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save"></i> Lưu hóa đơn
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="closeInvoiceModal()">Hủy</button>
+                </div>
+            </form>
         </div>
-
-        <form action="${pageContext.request.contextPath}/admin/invoices" method="POST">
-            <div class="form-group">
-                <label>Khách hàng *</label>
-                <input type="text" name="customerName" class="form-control" required>
+    </div>
+    <div id="invoiceDetailModal" class="modal-overlay" style="display:none;">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div>
+                    <h3>Chi tiết hóa đơn</h3>
+                    <p id="detailInvoiceId"></p>
+                </div>
+                <button type="button" class="btn btn-secondary btn-icon" onclick="closeInvoiceDetailModal()">
+                    <i class="bi bi-x-lg"></i>
+                </button>
             </div>
 
             <div class="form-group">
-                <label>Thú cưng *</label>
-                <input type="text" name="petName" class="form-control" required>
+                <label>Khách hàng</label>
+                <div id="detailCustomerName" class="form-control"></div>
             </div>
 
             <div class="form-group">
-                <label>Dịch vụ *</label>
-                <input type="text" name="serviceName" class="form-control" required>
+                <label>Thú cưng</label>
+                <div id="detailPetName" class="form-control"></div>
             </div>
 
             <div class="form-group">
-                <label>Tổng tiền (VNĐ) *</label>
-                <input type="number" name="totalAmount" class="form-control" min="0" required>
+                <label>Dịch vụ</label>
+                <div id="detailServiceName" class="form-control"></div>
             </div>
 
             <div class="form-group">
-                <label>Phương thức thanh toán</label>
-                <select name="paymentMethod" class="form-control">
-                    <option value="">Chưa chọn</option>
-                    <option value="CASH">Tiền mặt</option>
-                    <option value="TRANSFER">Chuyển khoản</option>
-                    <option value="CARD">Thẻ</option>
-                </select>
+                <label>Tổng tiền</label>
+                <div id="detailTotalAmount" class="form-control"></div>
             </div>
 
             <div class="form-group">
                 <label>Trạng thái</label>
-                <select name="status" class="form-control">
-                    <option value="UNPAID">Chưa thanh toán</option>
-                    <option value="PAID">Đã thanh toán</option>
-                    <option value="CANCELLED">Đã hủy</option>
-                </select>
+                <div id="detailStatus" class="form-control"></div>
+            </div>
+
+            <div class="form-group">
+                <label>Phương thức thanh toán</label>
+                <div id="detailPaymentMethod" class="form-control"></div>
+            </div>
+
+            <div class="form-group">
+                <label>Ngày lập</label>
+                <div id="detailCreatedAt" class="form-control"></div>
             </div>
 
             <div class="form-actions">
-                <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-save"></i> Lưu hóa đơn
-                </button>
-                <button type="button" class="btn btn-secondary" onclick="closeInvoiceModal()">Hủy</button>
+                <button type="button" class="btn btn-secondary" onclick="closeInvoiceDetailModal()">Đóng</button>
             </div>
-        </form>
+        </div>
     </div>
-</div>
-<body class="dashboard-body">
     <jsp:include page="/WEB-INF/views/dashboard/layout/sidebar.jsp">
         <jsp:param name="active" value="invoices"/>
     </jsp:include>
@@ -169,14 +259,15 @@
                     <input type="text"
                         name="keyword"
                         class="form-control"
+                        value="${keyword}"
                         placeholder="Tìm kiếm theo khách hàng hoặc mã hóa đơn..."
                         style="max-width: 360px;">
 
-                    <select name="status" class="form-control" style="max-width: 190px;">
-                        <option value="">Tất cả trạng thái</option>
-                        <option value="UNPAID">Chưa thanh toán</option>
-                        <option value="PAID">Đã thanh toán</option>
-                        <option value="CANCELLED">Đã hủy</option>
+                    <select name="status" class="form-control" style="max-width: 190px;" onchange="this.form.submit()">
+                        <option value="" ${status == '' || status == null ? 'selected' : ''}>Tất cả trạng thái</option>
+                        <option value="UNPAID" ${status == 'UNPAID' ? 'selected' : ''}>Chưa thanh toán</option>
+                        <option value="PAID" ${status == 'PAID' ? 'selected' : ''}>Đã thanh toán</option>
+                        <option value="CANCELLED" ${status == 'CANCELLED' ? 'selected' : ''}>Đã hủy</option>
                     </select>
 
                     <button type="submit" class="btn btn-primary">
@@ -202,38 +293,9 @@
                             <c:forEach var="item" items="${listInvoices}">
                                 <tr>
                                     <td>#HD${item.id}</td>
-                                    <td>
-                                        <span class="cell-title">
-                                            <c:choose>
-                                                <c:when test="${not empty item.customerName}">
-                                                    ${item.customerName}
-                                                </c:when>
-                                                <c:otherwise>
-                                                    ${item.manualCustomerName}
-                                                </c:otherwise>
-                                            </c:choose>
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <c:choose>
-                                            <c:when test="${not empty item.petName}">
-                                                ${item.petName}
-                                            </c:when>
-                                            <c:otherwise>
-                                                ${item.manualPetName}
-                                            </c:otherwise>
-                                        </c:choose>
-                                    </td>
-                                    <td>
-                                        <c:choose>
-                                            <c:when test="${not empty item.serviceName}">
-                                                ${item.serviceName}
-                                            </c:when>
-                                            <c:otherwise>
-                                                ${item.manualServiceName}
-                                            </c:otherwise>
-                                        </c:choose>
-                                    </td>
+                                    <td><span class="cell-title"><c:out value="${item.customerName}"/></span></td>
+                                    <td><c:out value="${item.petName}"/></td>
+                                    <td><c:out value="${item.serviceName}"/></td>
                                     <td>
                                         <strong><fmt:formatNumber value="${item.totalAmount}" pattern="#,###"/> đ</strong>
                                     </td>
@@ -253,15 +315,46 @@
                                     <td><fmt:formatDate value="${item.createdAt}" pattern="dd/MM/yyyy"/></td>
                                     <td>
                                         <div class="invoice-actions">
-                                            <a href="#" title="Xem chi tiết" class="btn btn-secondary btn-icon">
+                                            <button type="button"
+                                                    title="Xem chi tiết"
+                                                    class="btn btn-secondary btn-icon"
+                                                    onclick="openInvoiceDetailModal(
+                                                        '${item.id}',
+                                                        '${item.customerName}',
+                                                        '${item.petName}',
+                                                        '${item.serviceName}',
+                                                        '${item.totalAmount}',
+                                                        '${item.status}',
+                                                        '${item.paymentMethod}',
+                                                        '${item.createdAt}'
+                                                    )">
                                                 <i class="bi bi-eye"></i>
-                                            </a>
-                                            <a href="#" title="Đánh dấu đã thanh toán" class="btn btn-primary btn-icon">
-                                                <i class="bi bi-check-circle"></i>
-                                            </a>
-                                            <a href="#" title="Hủy hóa đơn" class="btn btn-danger btn-icon">
-                                                <i class="bi bi-x-circle"></i>
-                                            </a>
+                                            </button>
+
+                                            <button type="button"
+                                                    title="Sửa hóa đơn"
+                                                    class="btn btn-primary btn-icon"
+                                                    onclick="openEditInvoiceModal(
+                                                        '${item.id}',
+                                                        '${item.customerName}',
+                                                        '${item.petName}',
+                                                        '${item.serviceName}',
+                                                        '${item.totalAmount}',
+                                                        '${item.paymentMethod}',
+                                                        '${item.status}'
+                                                    )">
+                                                <i class="bi bi-pencil-square"></i>
+                                            </button>
+
+                                            <form action="${pageContext.request.contextPath}/admin/invoices" method="POST" style="display:inline;">
+                                                <input type="hidden" name="action" value="update-status">
+                                                <input type="hidden" name="id" value="${item.id}">
+                                                <input type="hidden" name="status" value="CANCELLED">
+                                                <button type="submit" title="Hủy hóa đơn" class="btn btn-danger btn-icon"
+                                                        onclick="return confirm('Bạn có chắc muốn hủy hóa đơn này?');">
+                                                    <i class="bi bi-x-circle"></i>
+                                                </button>
+                                            </form>
                                         </div>
                                     </td>
                                 </tr>

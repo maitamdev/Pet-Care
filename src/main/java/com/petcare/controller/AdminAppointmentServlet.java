@@ -73,11 +73,19 @@ public class AdminAppointmentServlet extends HttpServlet {
                 String status = request.getParameter("status");
                 
                 boolean success = appointmentDAO.updateStatus(id, status);
-                if ("COMPLETED".equals(status)) {
-                    invoiceDAO.createInvoiceFromAppointment(id);
-                }
+
                 if (success) {
-                    session.setAttribute("successMessage", "Cập nhật trạng thái lịch hẹn thành công!");
+                    if ("COMPLETED".equals(status)) {
+                        boolean invoiceCreated = invoiceDAO.createInvoiceFromAppointment(id);
+
+                        if (!invoiceCreated) {
+                            session.setAttribute("errorMessage", "Lịch hẹn đã hoàn thành nhưng chưa tạo được hóa đơn.");
+                        } else {
+                            session.setAttribute("successMessage", "Cập nhật trạng thái và tạo hóa đơn thành công!");
+                        }
+                    } else {
+                        session.setAttribute("successMessage", "Cập nhật trạng thái lịch hẹn thành công!");
+                    }
                 } else {
                     session.setAttribute("errorMessage", "Không thể cập nhật trạng thái lịch hẹn.");
                 }

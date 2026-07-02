@@ -25,21 +25,75 @@ public class InvoiceServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        List<Invoice> listInvoices = invoiceDAO.getAllInvoices();
+        String keyword = request.getParameter("keyword");
+        String status = request.getParameter("status");
+
+        List<Invoice> listInvoices = invoiceDAO.searchInvoices(keyword, status);
+
         request.setAttribute("listInvoices", listInvoices);
+        request.setAttribute("keyword", keyword);
+        request.setAttribute("status", status);
         request.getRequestDispatcher("/WEB-INF/views/dashboard/invoice-list.jsp").forward(request, response);
     }
     @Override
         protected void doPost(HttpServletRequest request, HttpServletResponse response)
                 throws ServletException, IOException {
             request.setCharacterEncoding("UTF-8");
+            String action = request.getParameter("action");
+            if ("update".equals(action)) {
+                int id = Integer.parseInt(request.getParameter("id"));
 
+                String customerName = request.getParameter("customerName");
+                String petName = request.getParameter("petName");
+                String serviceName = request.getParameter("serviceName");
+                String totalRaw = request.getParameter("totalAmount");
+                String status = request.getParameter("status");
+                String paymentMethod = request.getParameter("paymentMethod");
+
+                BigDecimal totalAmount = new BigDecimal(totalRaw.trim());
+
+                if (paymentMethod == null || paymentMethod.trim().isEmpty()) {
+                    paymentMethod = null;
+                }
+
+                boolean success = invoiceDAO.updateInvoice(
+                        id,
+                        customerName.trim(),
+                        petName.trim(),
+                        serviceName.trim(),
+                        totalAmount,
+                        status,
+                        paymentMethod
+                );
+
+                if (success) {
+                    response.sendRedirect(request.getContextPath() + "/admin/invoices?success=updated");
+                } else {
+                    response.sendRedirect(request.getContextPath() + "/admin/invoices?error=update_failed");
+                }
+                return;
+            }
+
+            if ("update-status".equals(action)) {
+                int id = Integer.parseInt(request.getParameter("id"));
+                String status = request.getParameter("status");
+
+                boolean success = invoiceDAO.updateInvoiceStatus(id, status);
+
+                if (success) {
+                    response.sendRedirect(request.getContextPath() + "/admin/invoices?success=updated");
+                } else {
+                    response.sendRedirect(request.getContextPath() + "/admin/invoices?error=update_failed");
+                }
+                return;
+            }
             String customerName = request.getParameter("customerName");
             String petName = request.getParameter("petName");
             String serviceName = request.getParameter("serviceName");
             String totalRaw = request.getParameter("totalAmount");
             String status = request.getParameter("status");
             String paymentMethod = request.getParameter("paymentMethod");
+            
 
             if (customerName == null || customerName.trim().isEmpty()
                     || petName == null || petName.trim().isEmpty()
