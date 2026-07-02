@@ -13,9 +13,26 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/dashboard.css">
 </head>
 <body class="dashboard-body">
-    <jsp:include page="/WEB-INF/views/dashboard/layout/sidebar.jsp">
-        <jsp:param name="active" value="services"/>
-    </jsp:include>
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="brand-mark"><i class="bi bi-heart-pulse"></i></div>
+            <div class="brand-copy">
+                <strong>PetCare</strong>
+                <span>Clinic admin</span>
+            </div>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="${pageContext.request.contextPath}/dashboard"><i class="bi bi-speedometer2"></i> Tổng quan</a></li>
+            <li><a href="${pageContext.request.contextPath}/admin/appointments"><i class="bi bi-calendar-check"></i> Lịch hẹn</a></li>
+            <li><a href="${pageContext.request.contextPath}/admin/pets"><i class="bi bi-heart"></i> Thú cưng</a></li>
+            <li><a href="${pageContext.request.contextPath}/admin/invoices"><i class="bi bi-receipt"></i> Hóa đơn</a></li>
+            <li><a href="${pageContext.request.contextPath}/admin/services" class="active"><i class="bi bi-clipboard2-pulse"></i> Dịch vụ</a></li>
+            <c:if test="${sessionScope.user.role == 'ADMIN'}">
+                <li><a href="${pageContext.request.contextPath}/admin/staff"><i class="bi bi-people"></i> Nhân sự</a></li>
+            </c:if>
+            <li><a class="logout-link" href="${pageContext.request.contextPath}/logout"><i class="bi bi-box-arrow-right"></i> Đăng xuất</a></li>
+        </ul>
+    </aside>
 
     <main class="main-content">
         <header class="topbar">
@@ -25,7 +42,7 @@
             </div>
             <div class="user-profile">
                 <div class="user-avatar"><i class="bi bi-person"></i></div>
-                <span>Xin chào, <strong>${sessionScope.user.fullName}</strong> (${sessionScope.user.role})</span>
+                <span>Xin chào, <strong><c:out value="${sessionScope.user.fullName}"/></strong> (${sessionScope.user.role})</span>
             </div>
         </header>
 
@@ -64,16 +81,12 @@
                         placeholder="Tìm kiếm dịch vụ theo tên..."
                         value="<c:out value='${keyword}'/>"
                         style="max-width: 360px;">
-                    <select name="sort" class="form-control" style="max-width: 180px;"  onchange="this.form.submit()">
-                        <option value="">Mặc định</option>
-                        <option value="price_asc" ${sort == 'price_asc' ? 'selected' : ''}>Giá thấp đến cao</option>
-                        <option value="price_desc" ${sort == 'price_desc' ? 'selected' : ''}>Giá cao đến thấp</option>
-                    </select>
+
                     <button type="submit" class="btn btn-primary">
                         <i class="bi bi-search"></i> Tìm kiếm
                     </button>
 
-                    <c:if test="${not empty keyword || not empty sort}">
+                    <c:if test="${not empty keyword}">
                         <a href="${pageContext.request.contextPath}/admin/services" class="btn btn-secondary">
                             <i class="bi bi-x-circle"></i> Xóa lọc
                         </a>
@@ -94,13 +107,17 @@
                             <c:forEach var="item" items="${listServices}">
                                 <tr>
                                     <td>#${item.id}</td>
-                                    <td><span class="cell-title">${item.name}</span></td>
+                                    <td><span class="cell-title"><c:out value="${item.name}"/></span></td>
                                     <td><strong><fmt:formatNumber value="${item.price}" pattern="#,###"/></strong></td>
-                                    <td>${item.description}</td>
+                                    <td><c:out value="${item.description}"/></td>
                                     <td>
                                         <div class="table-actions">
                                             <a title="Sửa" href="${pageContext.request.contextPath}/admin/services/edit?id=${item.id}" class="btn btn-warning btn-icon"><i class="bi bi-pencil-square"></i></a>
-                                            <a title="Xóa" href="${pageContext.request.contextPath}/admin/services/delete?id=${item.id}" class="btn btn-danger btn-icon" onclick="return confirm('Bạn có chắc muốn xóa dịch vụ này?');"><i class="bi bi-trash"></i></a>
+                                            <form action="${pageContext.request.contextPath}/admin/services/delete" method="POST" style="display:inline;" onsubmit="return confirm('Bạn có chắc muốn xóa dịch vụ này?');">
+                                                <input type="hidden" name="csrfToken" value="<c:out value='${csrfToken}'/>">
+                                                <input type="hidden" name="id" value="${item.id}">
+                                                <button title="Xóa" type="submit" class="btn btn-danger btn-icon"><i class="bi bi-trash"></i></button>
+                                            </form>
                                         </div>
                                     </td>
                                 </tr>

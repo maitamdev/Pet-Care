@@ -4,6 +4,8 @@ import com.petcare.dao.PetDAO;
 import com.petcare.dao.UserDAO;
 import com.petcare.model.Pet;
 import com.petcare.model.User;
+import com.petcare.util.CsrfUtil;
+import com.petcare.util.ValidationUtil;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -40,7 +42,7 @@ public class PetServlet extends HttpServlet {
                 showEditForm(request, response);
                 break;
             case "/admin/pets/delete":
-                deletePet(request, response);
+                response.sendRedirect(request.getContextPath() + "/admin/pets");
                 break;
             default:
                 listPets(request, response);
@@ -54,12 +56,20 @@ public class PetServlet extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
         String action = request.getServletPath();
 
+        if (!CsrfUtil.isValid(request)) {
+            response.sendRedirect(request.getContextPath() + "/admin/pets?error=csrf");
+            return;
+        }
+
         switch (action) {
             case "/admin/pets/insert":
                 insertPet(request, response);
                 break;
             case "/admin/pets/update":
                 updatePet(request, response);
+                break;
+            case "/admin/pets/delete":
+                deletePet(request, response);
                 break;
             default:
                 response.sendRedirect(request.getContextPath() + "/admin/pets");
@@ -71,6 +81,7 @@ public class PetServlet extends HttpServlet {
             throws ServletException, IOException {
         List<Pet> list = petDAO.getAllPets();
         request.setAttribute("listPets", list);
+        CsrfUtil.getToken(request);
         request.getRequestDispatcher("/WEB-INF/views/dashboard/pet-list.jsp").forward(request, response);
     }
 
@@ -78,6 +89,7 @@ public class PetServlet extends HttpServlet {
             throws ServletException, IOException {
         List<User> customers = userDAO.getAllCustomers();
         request.setAttribute("listCustomers", customers);
+        CsrfUtil.getToken(request);
         request.getRequestDispatcher("/WEB-INF/views/dashboard/pet-form.jsp").forward(request, response);
     }
 
@@ -89,6 +101,7 @@ public class PetServlet extends HttpServlet {
         
         List<User> customers = userDAO.getAllCustomers();
         request.setAttribute("listCustomers", customers);
+        CsrfUtil.getToken(request);
         
         request.getRequestDispatcher("/WEB-INF/views/dashboard/pet-form.jsp").forward(request, response);
     }
@@ -99,6 +112,11 @@ public class PetServlet extends HttpServlet {
         String name = request.getParameter("name");
         String species = request.getParameter("species");
         String breed = request.getParameter("breed");
+
+        if (ValidationUtil.isEmpty(name) || ValidationUtil.isEmpty(species)) {
+            response.sendRedirect(request.getContextPath() + "/admin/pets/new?error=invalid");
+            return;
+        }
         
         String ageStr = request.getParameter("age");
         Integer age = (ageStr != null && !ageStr.trim().isEmpty()) ? Integer.parseInt(ageStr) : null;
@@ -130,6 +148,11 @@ public class PetServlet extends HttpServlet {
         String name = request.getParameter("name");
         String species = request.getParameter("species");
         String breed = request.getParameter("breed");
+
+        if (ValidationUtil.isEmpty(name) || ValidationUtil.isEmpty(species)) {
+            response.sendRedirect(request.getContextPath() + "/admin/pets/edit?id=" + id + "&error=invalid");
+            return;
+        }
         
         String ageStr = request.getParameter("age");
         Integer age = (ageStr != null && !ageStr.trim().isEmpty()) ? Integer.parseInt(ageStr) : null;

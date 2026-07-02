@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.petcare.dao.ServiceDAO;
 import com.petcare.model.Service;
+import com.petcare.util.CsrfUtil;
 @WebServlet({"/admin/services", "/admin/services/new", "/admin/services/insert",
             "/admin/services/delete", "/admin/services/edit", "/admin/services/update"})
 public class ServiceServlet extends HttpServlet {
@@ -37,7 +38,7 @@ public class ServiceServlet extends HttpServlet {
                 showEditForm(request, response);
                 break;
             case "/admin/services/delete":
-                deleteService(request, response);
+                response.sendRedirect(request.getContextPath() + "/admin/services");
                 break;
             default:
                 listServices(request, response);
@@ -51,12 +52,20 @@ public class ServiceServlet extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
         String action = request.getServletPath();
 
+        if (!CsrfUtil.isValid(request)) {
+            response.sendRedirect(request.getContextPath() + "/admin/services?error=csrf");
+            return;
+        }
+
         switch (action) {
             case "/admin/services/insert":
                 insertService(request, response);
                 break;
             case "/admin/services/update":
                 updateService(request, response);
+                break;
+            case "/admin/services/delete":
+                deleteService(request, response);
                 break;
             default:
                 response.sendRedirect(request.getContextPath() + "/admin/services");
@@ -81,11 +90,13 @@ public class ServiceServlet extends HttpServlet {
         request.setAttribute("listServices", list);
         request.setAttribute("keyword", keyword);
         request.setAttribute("sort", sort);
+        CsrfUtil.getToken(request);
         request.getRequestDispatcher("/WEB-INF/views/dashboard/service-list.jsp").forward(request, response);
     }
 
     private void showNewForm(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        CsrfUtil.getToken(request);
         request.getRequestDispatcher("/WEB-INF/views/dashboard/service-form.jsp").forward(request, response);
     }
 
@@ -94,6 +105,7 @@ public class ServiceServlet extends HttpServlet {
         int id = Integer.parseInt(request.getParameter("id"));
         Service existingService = serviceDAO.getServiceById(id);
         request.setAttribute("service", existingService);
+        CsrfUtil.getToken(request);
         request.getRequestDispatcher("/WEB-INF/views/dashboard/service-form.jsp").forward(request, response);
     }
 

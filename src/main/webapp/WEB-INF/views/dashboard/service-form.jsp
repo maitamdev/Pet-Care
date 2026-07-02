@@ -12,9 +12,26 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/dashboard.css">
 </head>
 <body class="dashboard-body">
-    <jsp:include page="/WEB-INF/views/dashboard/layout/sidebar.jsp">
-        <jsp:param name="active" value="services"/>
-    </jsp:include>
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="brand-mark"><i class="bi bi-heart-pulse"></i></div>
+            <div class="brand-copy">
+                <strong>PetCare</strong>
+                <span>Clinic admin</span>
+            </div>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="${pageContext.request.contextPath}/dashboard"><i class="bi bi-speedometer2"></i> Tổng quan</a></li>
+            <li><a href="${pageContext.request.contextPath}/admin/appointments"><i class="bi bi-calendar-check"></i> Lịch hẹn</a></li>
+            <li><a href="${pageContext.request.contextPath}/admin/pets"><i class="bi bi-heart"></i> Thú cưng</a></li>
+            <li><a href="${pageContext.request.contextPath}/admin/invoices"><i class="bi bi-receipt"></i> Hóa đơn</a></li>
+            <li><a href="${pageContext.request.contextPath}/admin/services" class="active"><i class="bi bi-clipboard2-pulse"></i> Dịch vụ</a></li>
+            <c:if test="${sessionScope.user.role == 'ADMIN'}">
+                <li><a href="${pageContext.request.contextPath}/admin/staff"><i class="bi bi-people"></i> Nhân sự</a></li>
+            </c:if>
+            <li><a class="logout-link" href="${pageContext.request.contextPath}/logout"><i class="bi bi-box-arrow-right"></i> Đăng xuất</a></li>
+        </ul>
+    </aside>
 
     <main class="main-content">
         <header class="topbar">
@@ -24,7 +41,7 @@
             </div>
             <div class="user-profile">
                 <div class="user-avatar"><i class="bi bi-person"></i></div>
-                <span>Xin chào, <strong>${sessionScope.user.fullName}</strong> (${sessionScope.user.role})</span>
+                <span>Xin chào, <strong><c:out value="${sessionScope.user.fullName}"/></strong> (${sessionScope.user.role})</span>
             </div>
         </header>
 
@@ -39,10 +56,11 @@
                 <p class="card-subtitle">Giá nhập theo VNĐ, hệ thống sẽ định dạng lại ở danh sách.</p>
                 <c:if test="${not empty error}">
                     <div style="margin-top: 12px; padding: 12px 14px; border-radius: 8px; background: #fee2e2; color: #991b1b; font-weight: 600;">
-                        ${error}
+                        <c:out value="${error}"/>
                     </div>
                 </c:if>
                 <form action="${pageContext.request.contextPath}/admin/services/${service != null ? 'update' : 'insert'}" method="POST" style="margin-top:18px;" novalidate>
+                    <input type="hidden" name="csrfToken" value="<c:out value='${csrfToken}'/>">
                     <c:if test="${service != null}">
                         <input type="hidden" name="id" value="${service.id}">
                     </c:if>
@@ -72,3 +90,4 @@
     </main>
 </body>
 </html>
+

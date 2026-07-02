@@ -218,6 +218,71 @@
             margin-top: 4px;
         }
 
+        .service-consult-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            padding: 18px 20px;
+            margin: -4px 0 24px;
+            border: 2px solid var(--border-green);
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, rgba(42, 90, 83, 0.07), rgba(238, 124, 82, 0.05));
+            color: var(--text-dark);
+            text-decoration: none;
+            transition: transform var(--transition-bubbly), border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .service-consult-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--primary);
+            box-shadow: var(--shadow-flat-default);
+        }
+
+        .service-consult-copy {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .service-consult-copy i {
+            width: 38px;
+            height: 38px;
+            border-radius: var(--radius-full);
+            background: var(--primary);
+            color: #FFFFFF;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 auto;
+            font-size: 1.1rem;
+        }
+
+        .service-consult-title {
+            display: block;
+            font-weight: 800;
+            color: var(--text-dark);
+            line-height: 1.2;
+        }
+
+        .service-consult-subtitle {
+            display: block;
+            color: var(--text-light);
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-top: 2px;
+        }
+
+        .service-consult-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--primary);
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
         .card-item-check {
             position: absolute;
             top: 8px;
@@ -304,6 +369,10 @@
                 position: static;
                 padding: 24px;
             }
+            .service-consult-card {
+                align-items: flex-start;
+                flex-direction: column;
+            }
         }
     </style>
 </head>
@@ -324,8 +393,8 @@
             <div class="header-actions">
                 <c:choose>
                     <c:when test="${not empty sessionScope.user}">
-                        <a href="${pageContext.request.contextPath}/dashboard" class="nav-link" style="color: var(--accent-green); font-weight: bold;">
-                            <i class="bi bi-person-circle"></i> ${sessionScope.user.fullName}
+                        <a href="${pageContext.request.contextPath}${sessionScope.user.role == 'CUSTOMER' ? '/my/appointments' : '/dashboard'}" class="nav-link" style="color: var(--accent-green); font-weight: bold;">
+                            <i class="bi bi-person-circle"></i> <c:out value="${sessionScope.user.fullName}"/>
                         </a>
                         <a href="${pageContext.request.contextPath}/logout" class="nav-link" style="color: #c62828; font-weight: bold;">
                             <i class="bi bi-box-arrow-right"></i> Đăng xuất
@@ -350,11 +419,12 @@
 
             <c:if test="${not empty errorMessage}">
                 <div class="alert-error">
-                    <i class="bi bi-exclamation-triangle-fill"></i> ${errorMessage}
+                    <i class="bi bi-exclamation-triangle-fill"></i> <c:out value="${errorMessage}"/>
                 </div>
             </c:if>
 
             <form action="${pageContext.request.contextPath}/booking" method="POST">
+                <input type="hidden" name="csrfToken" value="<c:out value='${csrfToken}'/>">
                 <div class="booking-form-grid">
                     <!-- Left Column -->
                     <div class="booking-form-left">
@@ -372,8 +442,8 @@
                                         <div class="card-item-icon">
                                             <i class="bi bi-patch-check-fill"></i>
                                         </div>
-                                        <div class="card-item-title">${pet.name}</div>
-                                        <div class="card-item-subtitle">${pet.species}</div>
+                                        <div class="card-item-title"><c:out value="${pet.name}"/></div>
+                                        <div class="card-item-subtitle"><c:out value="${pet.species}"/></div>
                                     </div>
                                 </c:forEach>
                                 <div class="card-item pet-card-item" data-value="-1" id="addPetCard" onclick="selectPetCard('-1')">
@@ -389,7 +459,7 @@
                             <!-- Hidden native select for backend compatibility -->
                             <select name="petId" id="petId" class="form-control" onchange="toggleQuickPetFields()" style="display: none;">
                                 <c:forEach var="pet" items="${listPets}">
-                                    <option value="${pet.id}">${pet.name} (${pet.species})</option>
+                                    <option value="${pet.id}"><c:out value="${pet.name}"/> (<c:out value="${pet.species}"/>)</option>
                                 </c:forEach>
                                 <option value="-1" ${empty listPets ? 'selected' : ''}>+ Thêm thú cưng mới</option>
                             </select>
@@ -490,16 +560,27 @@
                                                 </c:otherwise>
                                             </c:choose>
                                         </div>
-                                        <div class="card-item-title">${service.name}</div>
+                                        <div class="card-item-title"><c:out value="${service.name}"/></div>
                                         <div class="card-item-price">${service.price}đ</div>
                                     </div>
                                 </c:forEach>
                             </div>
+
+                            <a class="service-consult-card" href="${pageContext.request.contextPath}/home#contact">
+                                <span class="service-consult-copy">
+                                    <i class="bi bi-headset"></i>
+                                    <span>
+                                        <span class="service-consult-title">Chưa chắc nên chọn dịch vụ nào?</span>
+                                        <span class="service-consult-subtitle">Đội ngũ PetCare tư vấn gói khám phù hợp theo tình trạng của bé.</span>
+                                    </span>
+                                </span>
+                                <span class="service-consult-action">Liên hệ tư vấn <i class="bi bi-arrow-right"></i></span>
+                            </a>
                             
                             <!-- Hidden native select for backend compatibility -->
                             <select name="serviceId" id="serviceId" class="form-control" required style="display: none;">
                                 <c:forEach var="service" items="${listServices}">
-                                    <option value="${service.id}">${service.name} (${service.price}đ)</option>
+                                    <option value="${service.id}"><c:out value="${service.name}"/> (${service.price}đ)</option>
                                 </c:forEach>
                             </select>
                         </div>

@@ -126,6 +126,7 @@
             </div>
 
             <form action="${pageContext.request.contextPath}/admin/invoices" method="POST">
+                <input type="hidden" name="csrfToken" value="<c:out value='${csrfToken}'/>">
                 <input type="hidden" name="action" id="invoiceAction" value="create">
                 <input type="hidden" name="id" id="invoiceId">
                 <div class="form-group">
@@ -347,6 +348,7 @@
                                             </button>
 
                                             <form action="${pageContext.request.contextPath}/admin/invoices" method="POST" style="display:inline;">
+                                                <input type="hidden" name="csrfToken" value="<c:out value='${csrfToken}'/>">
                                                 <input type="hidden" name="action" value="update-status">
                                                 <input type="hidden" name="id" value="${item.id}">
                                                 <input type="hidden" name="status" value="CANCELLED">

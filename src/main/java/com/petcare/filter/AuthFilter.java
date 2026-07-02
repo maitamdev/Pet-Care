@@ -30,7 +30,7 @@ public class AuthFilter implements Filter {
             return;
         }
 
-        boolean isProtected = path.startsWith("/dashboard") || path.startsWith("/admin") || path.startsWith("/staff");
+        boolean isProtected = path.startsWith("/dashboard") || path.startsWith("/admin") || path.startsWith("/staff") || path.startsWith("/my");
 
         if (isProtected) {
             HttpSession session = request.getSession(false);
@@ -41,8 +41,11 @@ public class AuthFilter implements Filter {
                 return;
             } else {
                 User user = (User) session.getAttribute("user");
-                if ("CUSTOMER".equals(user.getRole())) {
+                if (("CUSTOMER".equals(user.getRole())) && (path.startsWith("/dashboard") || path.startsWith("/admin") || path.startsWith("/staff"))) {
                     response.sendRedirect(request.getContextPath() + "/home");
+                    return;
+                } else if (!"CUSTOMER".equals(user.getRole()) && path.startsWith("/my")) {
+                    response.sendRedirect(request.getContextPath() + "/dashboard");
                     return;
                 }
             }

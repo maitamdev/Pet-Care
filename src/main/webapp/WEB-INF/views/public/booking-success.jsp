@@ -105,8 +105,8 @@
             <div class="header-actions">
                 <c:choose>
                     <c:when test="${not empty sessionScope.user}">
-                        <a href="${pageContext.request.contextPath}/dashboard" class="nav-link" style="color: var(--accent-green); font-weight: bold;">
-                            <i class="bi bi-person-circle"></i> ${sessionScope.user.fullName}
+                        <a href="${pageContext.request.contextPath}${sessionScope.user.role == 'CUSTOMER' ? '/my/appointments' : '/dashboard'}" class="nav-link" style="color: var(--accent-green); font-weight: bold;">
+                            <i class="bi bi-person-circle"></i> <c:out value="${sessionScope.user.fullName}"/>
                         </a>
                         <a href="${pageContext.request.contextPath}/logout" class="nav-link" style="color: #c62828; font-weight: bold;">
                             <i class="bi bi-box-arrow-right"></i> Đăng xuất

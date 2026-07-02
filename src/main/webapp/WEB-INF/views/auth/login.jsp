@@ -31,7 +31,7 @@
             </div>
             
             <c:if test="${not empty error}">
-                <div class="alert-error">${error}</div>
+                <div class="alert-error"><c:out value="${error}"/></div>
             </c:if>
             <c:if test="${param.registered == 'true'}">
                 <div class="alert-success">Đăng ký thành công! Vui lòng đăng nhập.</div>
@@ -63,3 +63,4 @@
     </div>
 </body>
 </html>
+
