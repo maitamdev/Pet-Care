@@ -6,207 +6,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý lịch hẹn - PetCare</title>
-    <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/assets/images/petcare_logo_icon.png">
-    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <title>Lịch hẹn - PetCare</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/dashboard.css">
-    <style>
-        /* Specific status badge colors for appointments */
-        .badge.status-pending { background: #fff3cd; color: #856404; }
-        .badge.status-confirmed { background: #cce5ff; color: #004085; }
-        .badge.status-completed { background: #d4edda; color: #155724; }
-        .badge.status-cancelled { background: #f8d7da; color: #721c24; }
-
-        .btn-action-group {
-            display: flex;
-            gap: 6px;
-        }
-
-        .alert {
-            padding: 12px 16px;
-            border-radius: var(--radius);
-            margin-bottom: 20px;
-            font-weight: 700;
-            font-size: 14px;
-        }
-        .alert-success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        .alert-danger {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-    </style>
 </head>
 <body class="dashboard-body">
-    <aside class="sidebar">
-        <div class="sidebar-header">
-            <div class="brand-mark"><i class="bi bi-heart-pulse"></i></div>
-            <div class="brand-copy">
-                <strong>PetCare</strong>
-                <span>Clinic admin</span>
+<aside class="sidebar">
+    <div class="sidebar-header"><div class="brand-mark"><i class="bi bi-heart-pulse"></i></div><div class="brand-copy"><strong>PetCare</strong><span>Clinic admin</span></div></div>
+    <ul class="sidebar-menu">
+        <li><a href="${pageContext.request.contextPath}/dashboard"><i class="bi bi-speedometer2"></i> Tổng quan</a></li>
+        <li><a class="active" href="${pageContext.request.contextPath}/admin/appointments"><i class="bi bi-calendar-check"></i> Lịch hẹn</a></li>
+        <li><a href="${pageContext.request.contextPath}/admin/pets"><i class="bi bi-heart"></i> Thú cưng</a></li>
+        <li><a href="${pageContext.request.contextPath}/admin/invoices"><i class="bi bi-receipt"></i> Hóa đơn</a></li>
+        <li><a href="${pageContext.request.contextPath}/admin/services"><i class="bi bi-clipboard2-pulse"></i> Dịch vụ</a></li>
+        <c:if test="${sessionScope.user.role == 'ADMIN'}"><li><a href="${pageContext.request.contextPath}/admin/staff"><i class="bi bi-people"></i> Nhân sự</a></li></c:if>
+        <li><a class="logout-link" href="${pageContext.request.contextPath}/logout"><i class="bi bi-box-arrow-right"></i> Đăng xuất</a></li>
+    </ul>
+</aside>
+<main class="main-content">
+    <header class="topbar">
+        <div><h1 class="topbar-title">Lịch hẹn</h1><p class="topbar-kicker">Duyệt lịch, phân công bác sĩ và ghi nhận kết quả khám.</p></div>
+        <div class="user-profile"><div class="user-avatar"><i class="bi bi-person"></i></div><span><c:out value="${sessionScope.user.fullName}"/> (${sessionScope.user.role})</span></div>
+    </header>
+    <div class="content-wrapper">
+        <c:if test="${not empty sessionScope.successMessage}">
+            <div class="notice notice-success"><c:out value="${sessionScope.successMessage}"/></div>
+            <c:remove var="successMessage" scope="session"/>
+        </c:if>
+        <c:if test="${not empty sessionScope.errorMessage}">
+            <div class="notice notice-danger"><c:out value="${sessionScope.errorMessage}"/></div>
+            <c:remove var="errorMessage" scope="session"/>
+        </c:if>
+
+        <div class="card-panel">
+            <div class="action-bar">
+                <div><h3 class="card-title">Danh sách lịch hẹn</h3><p class="card-subtitle">Hoàn thành lịch hẹn sẽ tự tạo hóa đơn chưa thanh toán.</p></div>
+                <a class="btn btn-secondary" href="${pageContext.request.contextPath}/admin/invoices"><i class="bi bi-receipt"></i> Xem hóa đơn</a>
+            </div>
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                    <tr><th>Mã</th><th>Khách hàng</th><th>Dịch vụ</th><th>Lịch khám</th><th>Hồ sơ khám</th><th>Trạng thái</th><th>Thao tác</th></tr>
+                    </thead>
+                    <tbody>
+                    <c:forEach var="item" items="${listAppointments}">
+                        <tr>
+                            <td>#${item.id}</td>
+                            <td><span class="cell-title"><c:out value="${item.customerName}"/></span><span class="cell-note"><c:out value="${item.petName}"/></span></td>
+                            <td><span class="cell-title"><c:out value="${item.serviceName}"/></span><span class="cell-note"><fmt:formatNumber value="${item.priceAtBooking}" pattern="#,###"/>đ</span></td>
+                            <td><strong><fmt:formatDate value="${item.appointmentDate}" pattern="dd/MM/yyyy"/></strong><span class="cell-note"><fmt:formatDate value="${item.appointmentDate}" pattern="HH:mm"/></span></td>
+                            <td style="min-width:280px;">
+                                <form method="POST" action="${pageContext.request.contextPath}/admin/appointments/update-clinical" class="inline-clinic-form">
+                                    <input type="hidden" name="csrfToken" value="<c:out value='${csrfToken}'/>">
+                                    <input type="hidden" name="id" value="${item.id}">
+                                    <select class="form-control" name="staffId">
+                                        <option value="">Chưa phân công</option>
+                                        <c:forEach var="staff" items="${listStaff}">
+                                            <option value="${staff.id}" ${item.staffId == staff.id ? 'selected' : ''}><c:out value="${staff.fullName}"/></option>
+                                        </c:forEach>
+                                    </select>
+                                    <textarea class="form-control" name="diagnosis" placeholder="Chẩn đoán, dặn dò sau khám..."><c:out value="${item.diagnosis}"/></textarea>
+                                    <button class="btn btn-secondary" type="submit"><i class="bi bi-journal-medical"></i> Lưu hồ sơ</button>
+                                </form>
+                            </td>
+                            <td><span class="status-pill status-${item.status.toLowerCase()}">${item.status}</span></td>
+                            <td>
+                                <div class="btn-action-group">
+                                    <c:if test="${item.status == 'PENDING'}">
+                                        <form method="POST" action="${pageContext.request.contextPath}/admin/appointments/update-status">
+                                            <input type="hidden" name="csrfToken" value="<c:out value='${csrfToken}'/>">
+                                            <input type="hidden" name="id" value="${item.id}">
+                                            <input type="hidden" name="status" value="CONFIRMED">
+                                            <button class="btn btn-primary btn-icon" type="submit" title="Xác nhận"><i class="bi bi-check-lg"></i></button>
+                                        </form>
+                                        <form method="POST" action="${pageContext.request.contextPath}/admin/appointments/update-status">
+                                            <input type="hidden" name="csrfToken" value="<c:out value='${csrfToken}'/>">
+                                            <input type="hidden" name="id" value="${item.id}">
+                                            <input type="hidden" name="status" value="CANCELLED">
+                                            <button class="btn btn-danger btn-icon" type="submit" title="Hủy"><i class="bi bi-x-lg"></i></button>
+                                        </form>
+                                    </c:if>
+                                    <c:if test="${item.status == 'CONFIRMED'}">
+                                        <form method="POST" action="${pageContext.request.contextPath}/admin/appointments/update-status">
+                                            <input type="hidden" name="csrfToken" value="<c:out value='${csrfToken}'/>">
+                                            <input type="hidden" name="id" value="${item.id}">
+                                            <input type="hidden" name="status" value="COMPLETED">
+                                            <button class="btn btn-warning" type="submit"><i class="bi bi-clipboard-check"></i> Hoàn thành</button>
+                                        </form>
+                                    </c:if>
+                                </div>
+                            </td>
+                        </tr>
+                    </c:forEach>
+                    <c:if test="${empty listAppointments}"><tr><td colspan="7"><div class="empty-state">Chưa có lịch hẹn nào.</div></td></tr></c:if>
+                    </tbody>
+                </table>
             </div>
         </div>
-        <ul class="sidebar-menu">
-            <li><a href="${pageContext.request.contextPath}/dashboard"><i class="bi bi-speedometer2"></i> Tổng quan</a></li>
-            <li><a href="${pageContext.request.contextPath}/admin/appointments" class="active"><i class="bi bi-calendar-check"></i> Lịch hẹn</a></li>
-            <li><a href="${pageContext.request.contextPath}/admin/pets"><i class="bi bi-heart"></i> Thú cưng</a></li>
-            <li><a href="#"><i class="bi bi-receipt"></i> Hóa đơn</a></li>
-            <li><a href="${pageContext.request.contextPath}/admin/services"><i class="bi bi-clipboard2-pulse"></i> Dịch vụ</a></li>
-            <c:if test="${sessionScope.user.role == 'ADMIN'}">
-                <li><a href="#"><i class="bi bi-people"></i> Nhân sự</a></li>
-            </c:if>
-            <li><a class="logout-link" href="${pageContext.request.contextPath}/logout"><i class="bi bi-box-arrow-right"></i> Đăng xuất</a></li>
-        </ul>
-    </aside>
-
-    <main class="main-content">
-        <header class="topbar">
-            <div>
-                <h1 class="topbar-title">Quản lý lịch hẹn</h1>
-                <p class="topbar-kicker">Xem danh sách, phê duyệt và cập nhật tiến độ lịch hẹn khám</p>
-            </div>
-            <div class="user-profile">
-                <div class="user-avatar"><i class="bi bi-person"></i></div>
-                <span>Xin chào, <strong>${sessionScope.user.fullName}</strong> (${sessionScope.user.role})</span>
-            </div>
-        </header>
-
-        <div class="content-wrapper">
-            <!-- Success/Error Alerts -->
-            <c:if test="${not empty sessionScope.successMessage}">
-                <div class="alert alert-success">
-                    <i class="bi bi-check-circle-fill"></i> ${sessionScope.successMessage}
-                </div>
-                <c:remove var="successMessage" scope="session" />
-            </c:if>
-            <c:if test="${not empty sessionScope.errorMessage}">
-                <div class="alert alert-danger">
-                    <i class="bi bi-exclamation-triangle-fill"></i> ${sessionScope.errorMessage}
-                </div>
-                <c:remove var="errorMessage" scope="session" />
-            </c:if>
-
-            <div class="card-panel">
-                <div class="action-bar">
-                    <div>
-                        <h3 class="card-title">Danh sách lịch hẹn</h3>
-                        <p class="card-subtitle">Cập nhật trạng thái khám của thú cưng khách hàng.</p>
-                    </div>
-                </div>
-
-                <div class="table-responsive">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Mã LH</th>
-                                <th>Khách hàng</th>
-                                <th>Thú cưng</th>
-                                <th>Dịch vụ</th>
-                                <th>Lịch hẹn</th>
-                                <th>Triệu chứng / Ghi chú</th>
-                                <th>Trạng thái</th>
-                                <th style="text-align: center;">Thao tác duyệt</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <c:forEach var="item" items="${listAppointments}">
-                                <tr>
-                                    <td>#${item.id}</td>
-                                    <td><strong>${item.customerName}</strong></td>
-                                    <td>${item.petName}</td>
-                                    <td>
-                                        <span class="cell-title">${item.serviceName}</span>
-                                        <span class="cell-note" style="color: var(--brand); font-weight: bold;">
-                                            <fmt:formatNumber value="${item.priceAtBooking}" type="currency" currencySymbol="đ" maxFractionDigits="0" />
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <strong><fmt:formatDate value="${item.appointmentDate}" pattern="dd/MM/yyyy" /></strong>
-                                        <br/>
-                                        <span class="cell-note"><i class="bi bi-clock"></i> <fmt:formatDate value="${item.appointmentDate}" pattern="HH:mm" /></span>
-                                    </td>
-                                    <td>
-                                        <span style="font-size: 13px; color: var(--text-body);">
-                                            <c:out value="${item.reason}" default="Không có ghi chú" />
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <c:choose>
-                                            <c:when test="${item.status == 'PENDING'}">
-                                                <span class="badge status-pending"><i class="bi bi-hourglass-split"></i> Chờ duyệt</span>
-                                            </c:when>
-                                            <c:when test="${item.status == 'CONFIRMED'}">
-                                                <span class="badge status-confirmed"><i class="bi bi-check-circle"></i> Đã xác nhận</span>
-                                            </c:when>
-                                            <c:when test="${item.status == 'COMPLETED'}">
-                                                <span class="badge status-completed"><i class="bi bi-calendar-check-fill"></i> Hoàn thành</span>
-                                            </c:when>
-                                            <c:when test="${item.status == 'CANCELLED'}">
-                                                <span class="badge status-cancelled"><i class="bi bi-x-circle-fill"></i> Đã hủy</span>
-                                            </c:when>
-                                        </c:choose>
-                                    </td>
-                                    <td>
-                                        <div class="btn-action-group" style="justify-content: center;">
-                                            <c:if test="${item.status == 'PENDING'}">
-                                                <form action="${pageContext.request.contextPath}/admin/appointments/update-status" method="POST" style="display:inline;">
-                                                    <input type="hidden" name="id" value="${item.id}">
-                                                    <input type="hidden" name="status" value="CONFIRMED">
-                                                    <button type="submit" class="btn btn-primary btn-sm" title="Xác nhận lịch hẹn">
-                                                        <i class="bi bi-check-lg"></i> Xác nhận
-                                                    </button>
-                                                </form>
-                                                <form action="${pageContext.request.contextPath}/admin/appointments/update-status" method="POST" style="display:inline;">
-                                                    <input type="hidden" name="id" value="${item.id}">
-                                                    <input type="hidden" name="status" value="CANCELLED">
-                                                    <button type="submit" class="btn btn-danger btn-sm" title="Hủy lịch hẹn" onclick="return confirm('Bạn có chắc chắn muốn hủy lịch hẹn này?');">
-                                                        <i class="bi bi-trash"></i> Hủy
-                                                    </button>
-                                                </form>
-                                            </c:if>
-                                            <c:if test="${item.status == 'CONFIRMED'}">
-                                                <form action="${pageContext.request.contextPath}/admin/appointments/update-status" method="POST" style="display:inline;">
-                                                    <input type="hidden" name="id" value="${item.id}">
-                                                    <input type="hidden" name="status" value="COMPLETED">
-                                                    <button type="submit" class="btn btn-warning btn-sm" style="background-color: var(--success); border-color: var(--success);" title="Đánh dấu hoàn thành">
-                                                        <i class="bi bi-calendar-check"></i> Hoàn thành
-                                                    </button>
-                                                </form>
-                                                <form action="${pageContext.request.contextPath}/admin/appointments/update-status" method="POST" style="display:inline;">
-                                                    <input type="hidden" name="id" value="${item.id}">
-                                                    <input type="hidden" name="status" value="CANCELLED">
-                                                    <button type="submit" class="btn btn-danger btn-sm" title="Hủy lịch hẹn" onclick="return confirm('Bạn có chắc chắn muốn hủy lịch hẹn này?');">
-                                                        <i class="bi bi-trash"></i> Hủy
-                                                    </button>
-                                                </form>
-                                            </c:if>
-                                            <c:if test="${item.status == 'COMPLETED' || item.status == 'CANCELLED'}">
-                                                <span class="cell-note" style="font-style: italic;">Không có hành động</span>
-                                            </c:if>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </c:forEach>
-                            <c:if test="${empty listAppointments}">
-                                <tr>
-                                    <td colspan="8">
-                                        <div class="empty-state" style="text-align: center; padding: 48px; color: var(--muted);">
-                                            <i class="bi bi-calendar-x" style="font-size: 3rem; display: block; margin-bottom: 12px;"></i>
-                                            Chưa có lịch hẹn nào được tạo trong hệ thống.
-                                        </div>
-                                    </td>
-                                </tr>
-                            </c:if>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </main>
+    </div>
+</main>
 </body>
 </html>

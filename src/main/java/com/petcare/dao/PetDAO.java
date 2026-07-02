@@ -71,6 +71,21 @@ public class PetDAO {
         return null;
     }
 
+    public boolean isPetOwnedByCustomer(int petId, int customerId) {
+        String sql = "SELECT id FROM pets WHERE id = ? AND customer_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, petId);
+            ps.setInt(2, customerId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     public boolean addPet(Pet p) {
         String sql = "INSERT INTO pets (customer_id, name, species, breed, age, weight, gender, notes) " +
                      "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
@@ -150,8 +165,32 @@ public class PetDAO {
         return false;
     }
 
+    public boolean updatePetForCustomer(Pet p) {
+        String sql = "UPDATE pets SET name=?, species=?, breed=?, age=?, weight=?, gender=?, notes=? WHERE id=? AND customer_id=?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, p.getName());
+            ps.setString(2, p.getSpecies());
+            ps.setString(3, p.getBreed());
+
+            if (p.getAge() != null) ps.setInt(4, p.getAge());
+            else ps.setNull(4, Types.INTEGER);
+
+            ps.setBigDecimal(5, p.getWeight());
+            ps.setString(6, p.getGender());
+            ps.setString(7, p.getNotes());
+            ps.setInt(8, p.getId());
+            ps.setInt(9, p.getCustomerId());
+
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     public boolean deletePet(int id) {
-        String sql = "DELETE FROM pets WHERE id=?";
+        String sql = "DELETE FROM pets WHERE id=? AND NOT EXISTS (SELECT 1 FROM appointments a WHERE a.pet_id = pets.id)";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);

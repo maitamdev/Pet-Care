@@ -18,10 +18,10 @@ public class DBConnection {
 
     private static String setting(String name, String defaultValue) {
         String value = System.getenv(name);
-        if (value == null || value.isBlank()) {
+        if (value == null || value.trim().isEmpty()) {
             value = System.getProperty(name);
         }
-        return value == null || value.isBlank() ? defaultValue : value;
+        return value == null || value.trim().isEmpty() ? defaultValue : value;
     }
 
     public static Connection getConnection() throws SQLException {

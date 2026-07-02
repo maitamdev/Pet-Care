@@ -2,7 +2,6 @@ package com.petcare.controller;
 
 import com.petcare.dao.UserDAO;
 import com.petcare.model.User;
-import com.petcare.util.HashUtil;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -46,8 +45,7 @@ public class LoginServlet extends HttpServlet {
             return;
         }
 
-        String passwordHash = HashUtil.hashPassword(passwordRaw);
-        User user = userDAO.login(username, passwordHash);
+        User user = userDAO.login(username, passwordRaw);
 
         String redirect = request.getParameter("redirect");
 
@@ -63,7 +61,11 @@ public class LoginServlet extends HttpServlet {
                     if (target.startsWith("/")) {
                         target = target.substring(1);
                     }
-                    response.sendRedirect(request.getContextPath() + "/" + target);
+                    if (target.startsWith("booking")) {
+                        response.sendRedirect(request.getContextPath() + "/" + target);
+                    } else {
+                        response.sendRedirect(request.getContextPath() + "/home");
+                    }
                 } else {
                     response.sendRedirect(request.getContextPath() + "/home");
                 }

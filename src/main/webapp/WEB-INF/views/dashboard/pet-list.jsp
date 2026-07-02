@@ -24,10 +24,10 @@
             <li><a href="${pageContext.request.contextPath}/dashboard"><i class="bi bi-speedometer2"></i> Tổng quan</a></li>
             <li><a href="${pageContext.request.contextPath}/admin/appointments"><i class="bi bi-calendar-check"></i> Lịch hẹn</a></li>
             <li><a href="${pageContext.request.contextPath}/admin/pets" class="active"><i class="bi bi-heart"></i> Thú cưng</a></li>
-            <li><a href="#"><i class="bi bi-receipt"></i> Hóa đơn</a></li>
+            <li><a href="${pageContext.request.contextPath}/admin/invoices"><i class="bi bi-receipt"></i> Hóa đơn</a></li>
             <li><a href="${pageContext.request.contextPath}/admin/services"><i class="bi bi-clipboard2-pulse"></i> Dịch vụ</a></li>
             <c:if test="${sessionScope.user.role == 'ADMIN'}">
-                <li><a href="#"><i class="bi bi-people"></i> Nhân sự</a></li>
+                <li><a href="${pageContext.request.contextPath}/admin/staff"><i class="bi bi-people"></i> Nhân sự</a></li>
             </c:if>
             <li><a class="logout-link" href="${pageContext.request.contextPath}/logout"><i class="bi bi-box-arrow-right"></i> Đăng xuất</a></li>
         </ul>
@@ -41,7 +41,7 @@
             </div>
             <div class="user-profile">
                 <div class="user-avatar"><i class="bi bi-person"></i></div>
-                <span>Xin chào, <strong>${sessionScope.user.fullName}</strong> (${sessionScope.user.role})</span>
+                <span>Xin chào, <strong><c:out value="${sessionScope.user.fullName}"/></strong> (${sessionScope.user.role})</span>
             </div>
         </header>
 
@@ -71,9 +71,9 @@
                         <tbody>
                             <c:forEach var="item" items="${listPets}">
                                 <tr>
-                                    <td><span class="cell-title">${item.name}</span><span class="cell-note">${item.breed}</span></td>
-                                    <td>${item.customerName}</td>
-                                    <td>${item.species}</td>
+                                    <td><span class="cell-title"><c:out value="${item.name}"/></span><span class="cell-note"><c:out value="${item.breed}"/></span></td>
+                                    <td><c:out value="${item.customerName}"/></td>
+                                    <td><c:out value="${item.species}"/></td>
                                     <td>
                                         <c:choose>
                                             <c:when test="${item.gender == 'MALE'}"><span class="badge male">Đực</span></c:when>
@@ -86,7 +86,11 @@
                                     <td>
                                         <div class="table-actions">
                                             <a title="Sửa" href="${pageContext.request.contextPath}/admin/pets/edit?id=${item.id}" class="btn btn-warning btn-icon"><i class="bi bi-pencil-square"></i></a>
-                                            <a title="Xóa" href="${pageContext.request.contextPath}/admin/pets/delete?id=${item.id}" class="btn btn-danger btn-icon" onclick="return confirm('Bạn có chắc muốn xóa thú cưng này?');"><i class="bi bi-trash"></i></a>
+                                            <form action="${pageContext.request.contextPath}/admin/pets/delete" method="POST" style="display:inline;" onsubmit="return confirm('Bạn có chắc muốn xóa thú cưng này?');">
+                                                <input type="hidden" name="csrfToken" value="<c:out value='${csrfToken}'/>">
+                                                <input type="hidden" name="id" value="${item.id}">
+                                                <button title="Xóa" type="submit" class="btn btn-danger btn-icon"><i class="bi bi-trash"></i></button>
+                                            </form>
                                         </div>
                                     </td>
                                 </tr>

@@ -6,7 +6,7 @@ $Maven = if (Test-Path $LocalMaven) { $LocalMaven } else { 'mvn' }
 if (Test-Path (Join-Path $ProjectRoot '.env.ps1')) {
     . (Join-Path $ProjectRoot '.env.ps1')
 } else {
-    Write-Warning 'Chua cau hinh database. Hay chay .\setup.ps1 truoc.'
+    throw 'Chua cau hinh database. Hay chay .\setup.ps1 truoc, sau do chay lai .\run.ps1.'
 }
 
 Set-Location $ProjectRoot

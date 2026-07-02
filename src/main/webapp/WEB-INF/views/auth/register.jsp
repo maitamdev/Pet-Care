@@ -30,7 +30,7 @@
             </div>
             
             <c:if test="${not empty error}">
-                <div class="alert-error">${error}</div>
+                <div class="alert-error"><c:out value="${error}"/></div>
             </c:if>
 
             <form action="${pageContext.request.contextPath}/register" method="POST">
@@ -65,3 +65,4 @@
     </div>
 </body>
 </html>
+
