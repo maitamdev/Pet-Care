@@ -5,9 +5,11 @@ import com.petcare.dao.UserDAO;
 import com.petcare.model.Pet;
 import com.petcare.model.User;
 import com.petcare.util.CsrfUtil;
+import com.petcare.util.FileUploadUtil;
 import com.petcare.util.ValidationUtil;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -18,6 +20,7 @@ import java.util.List;
 
 @WebServlet({"/admin/pets", "/admin/pets/new", "/admin/pets/insert", 
              "/admin/pets/delete", "/admin/pets/edit", "/admin/pets/update"})
+@MultipartConfig(maxFileSize = 2 * 1024 * 1024, maxRequestSize = 3 * 1024 * 1024)
 public class PetServlet extends HttpServlet {
 
     private PetDAO petDAO;
@@ -107,7 +110,7 @@ public class PetServlet extends HttpServlet {
     }
 
     private void insertPet(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
+            throws IOException, ServletException {
         int customerId = Integer.parseInt(request.getParameter("customerId"));
         String name = request.getParameter("name");
         String species = request.getParameter("species");
@@ -135,6 +138,7 @@ public class PetServlet extends HttpServlet {
         p.setAge(age);
         p.setWeight(weight);
         p.setGender(gender);
+        p.setImageUrl(FileUploadUtil.saveImage(request.getPart("image"), getUploadRoot()));
         p.setNotes(notes);
 
         petDAO.addPet(p);
@@ -142,7 +146,7 @@ public class PetServlet extends HttpServlet {
     }
 
     private void updatePet(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
+            throws IOException, ServletException {
         int id = Integer.parseInt(request.getParameter("id"));
         int customerId = Integer.parseInt(request.getParameter("customerId"));
         String name = request.getParameter("name");
@@ -172,6 +176,12 @@ public class PetServlet extends HttpServlet {
         p.setAge(age);
         p.setWeight(weight);
         p.setGender(gender);
+        String imageUrl = FileUploadUtil.saveImage(request.getPart("image"), getUploadRoot());
+        if (imageUrl == null) {
+            Pet existing = petDAO.getPetById(id);
+            imageUrl = existing == null ? null : existing.getImageUrl();
+        }
+        p.setImageUrl(imageUrl);
         p.setNotes(notes);
 
         petDAO.updatePet(p);
@@ -183,5 +193,9 @@ public class PetServlet extends HttpServlet {
         int id = Integer.parseInt(request.getParameter("id"));
         petDAO.deletePet(id);
         response.sendRedirect(request.getContextPath() + "/admin/pets");
+    }
+
+    private String getUploadRoot() {
+        return getServletContext().getRealPath("/uploads");
     }
 }

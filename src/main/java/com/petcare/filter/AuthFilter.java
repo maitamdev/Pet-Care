@@ -25,7 +25,7 @@ public class AuthFilter implements Filter {
 
         String path = request.getRequestURI().substring(request.getContextPath().length());
 
-        if (path.startsWith("/assets/")) {
+        if (path.startsWith("/assets/") || path.startsWith("/uploads/")) {
             chain.doFilter(request, response);
             return;
         }
@@ -47,6 +47,9 @@ public class AuthFilter implements Filter {
                 } else if (!"CUSTOMER".equals(user.getRole()) && path.startsWith("/my")) {
                     response.sendRedirect(request.getContextPath() + "/dashboard");
                     return;
+                } else if ("STAFF".equals(user.getRole()) && isAdminOnly(path)) {
+                    response.sendRedirect(request.getContextPath() + "/dashboard");
+                    return;
                 }
             }
         }
@@ -56,5 +59,11 @@ public class AuthFilter implements Filter {
 
     @Override
     public void destroy() {
+    }
+
+    private boolean isAdminOnly(String path) {
+        return path.startsWith("/admin/staff") ||
+                path.startsWith("/admin/services") ||
+                path.startsWith("/admin/reports");
     }
 }

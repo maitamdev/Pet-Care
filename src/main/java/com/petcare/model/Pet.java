@@ -12,6 +12,7 @@ public class Pet {
     private Integer age;
     private BigDecimal weight;
     private String gender;
+    private String imageUrl;
     private String notes;
     private Timestamp createdAt;
     
@@ -35,6 +36,8 @@ public class Pet {
     public void setWeight(BigDecimal weight) { this.weight = weight; }
     public String getGender() { return gender; }
     public void setGender(String gender) { this.gender = gender; }
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
     public String getNotes() { return notes; }
     public void setNotes(String notes) { this.notes = notes; }
     public Timestamp getCreatedAt() { return createdAt; }

@@ -14,10 +14,17 @@
     <div class="content-wrapper">
         <div class="card-panel form-shell">
             <h1 class="topbar-title">${pet == null ? 'Thêm thú cưng' : 'Cập nhật thú cưng'}</h1>
-            <form method="POST" action="${pageContext.request.contextPath}/my/pets/${pet == null ? 'insert' : 'update'}" style="margin-top:20px;">
+            <form method="POST" action="${pageContext.request.contextPath}/my/pets/${pet == null ? 'insert' : 'update'}" enctype="multipart/form-data" style="margin-top:20px;">
                 <input type="hidden" name="csrfToken" value="<c:out value='${csrfToken}'/>">
-                <c:if test="${pet != null}"><input type="hidden" name="id" value="${pet.id}"></c:if>
+                <c:if test="${pet != null}"><input type="hidden" name="id" value="<c:out value='${pet.id}'/>"></c:if>
                 <div class="form-grid">
+                    <div class="form-group full">
+                        <label>Ảnh thú cưng</label>
+                        <c:if test="${not empty pet.imageUrl}">
+                            <img src="${pageContext.request.contextPath}${pet.imageUrl}" alt="Pet" style="width:120px;height:90px;object-fit:cover;border-radius:8px;display:block;margin-bottom:10px;">
+                        </c:if>
+                        <input type="file" class="form-control" name="image" accept="image/png,image/jpeg,image/gif">
+                    </div>
                     <div class="form-group"><label>Tên *</label><input class="form-control" name="name" value="<c:out value='${pet.name}'/>" required></div>
                     <div class="form-group"><label>Loài *</label><input class="form-control" name="species" value="<c:out value='${pet.species}'/>" required></div>
                     <div class="form-group"><label>Giống</label><input class="form-control" name="breed" value="<c:out value='${pet.breed}'/>"></div>

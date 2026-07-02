@@ -100,10 +100,10 @@
                             <c:forEach var="item" items="${listAppointments}">
                                 <tr>
                                     <td>#${item.id}</td>
-                                    <td><strong>${item.customerName}</strong></td>
-                                    <td>${item.petName}</td>
+                                    <td><strong><c:out value="${item.customerName}"/></strong></td>
+                                    <td><c:out value="${item.petName}"/></td>
                                     <td>
-                                        <span class="cell-title">${item.serviceName}</span>
+                                        <span class="cell-title"><c:out value="${item.serviceName}"/></span>
                                         <span class="cell-note" style="color: var(--brand); font-weight: bold;">
                                             <fmt:formatNumber value="${item.priceAtBooking}" type="currency" currencySymbol="đ" maxFractionDigits="0" />
                                         </span>
@@ -139,7 +139,7 @@
                                             <c:if test="${item.status == 'PENDING'}">
                                                 <form action="${pageContext.request.contextPath}/admin/appointments/update-status" method="POST" style="display:inline;">
                                                     <input type="hidden" name="csrfToken" value="<c:out value='${csrfToken}'/>">
-                                                    <input type="hidden" name="id" value="${item.id}">
+                                                    <input type="hidden" name="id" value="<c:out value='${item.id}'/>">
                                                     <input type="hidden" name="status" value="CONFIRMED">
                                                     <button type="submit" class="btn btn-primary btn-sm" title="Xác nhận lịch hẹn">
                                                         <i class="bi bi-check-lg"></i> Xác nhận
@@ -147,7 +147,7 @@
                                                 </form>
                                                 <form action="${pageContext.request.contextPath}/admin/appointments/update-status" method="POST" style="display:inline;">
                                                     <input type="hidden" name="csrfToken" value="<c:out value='${csrfToken}'/>">
-                                                    <input type="hidden" name="id" value="${item.id}">
+                                                    <input type="hidden" name="id" value="<c:out value='${item.id}'/>">
                                                     <input type="hidden" name="status" value="CANCELLED">
                                                     <button type="submit" class="btn btn-danger btn-sm" title="Hủy lịch hẹn" onclick="return confirm('Bạn có chắc chắn muốn hủy lịch hẹn này?');">
                                                         <i class="bi bi-trash"></i> Hủy
@@ -157,7 +157,7 @@
                                             <c:if test="${item.status == 'CONFIRMED'}">
                                                 <form action="${pageContext.request.contextPath}/admin/appointments/update-status" method="POST" style="display:inline;">
                                                     <input type="hidden" name="csrfToken" value="<c:out value='${csrfToken}'/>">
-                                                    <input type="hidden" name="id" value="${item.id}">
+                                                    <input type="hidden" name="id" value="<c:out value='${item.id}'/>">
                                                     <input type="hidden" name="status" value="COMPLETED">
                                                     <button type="submit" class="btn btn-warning btn-sm" style="background-color: var(--success); border-color: var(--success);" title="Đánh dấu hoàn thành">
                                                         <i class="bi bi-calendar-check"></i> Hoàn thành
@@ -165,7 +165,7 @@
                                                 </form>
                                                 <form action="${pageContext.request.contextPath}/admin/appointments/update-status" method="POST" style="display:inline;">
                                                     <input type="hidden" name="csrfToken" value="<c:out value='${csrfToken}'/>">
-                                                    <input type="hidden" name="id" value="${item.id}">
+                                                    <input type="hidden" name="id" value="<c:out value='${item.id}'/>">
                                                     <input type="hidden" name="status" value="CANCELLED">
                                                     <button type="submit" class="btn btn-danger btn-sm" title="Hủy lịch hẹn" onclick="return confirm('Bạn có chắc chắn muốn hủy lịch hẹn này?');">
                                                         <i class="bi bi-trash"></i> Hủy

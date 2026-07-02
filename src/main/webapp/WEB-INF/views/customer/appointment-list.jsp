@@ -44,12 +44,12 @@
                             <td><c:out value="${item.serviceName}"/></td>
                             <td><strong><fmt:formatDate value="${item.appointmentDate}" pattern="dd/MM/yyyy"/></strong><span class="cell-note"><fmt:formatDate value="${item.appointmentDate}" pattern="HH:mm"/></span></td>
                             <td><c:out value="${empty item.staffName ? 'Chưa phân công' : item.staffName}"/></td>
-                            <td><span class="status-pill status-${item.status.toLowerCase()}">${item.status}</span></td>
+                            <td><span class="status-pill status-${item.status.toLowerCase()}"><c:out value="${item.status}"/></span></td>
                             <td>
                                 <c:if test="${item.status == 'PENDING' || item.status == 'CONFIRMED'}">
                                     <form method="POST" action="${pageContext.request.contextPath}/my/appointments/cancel" onsubmit="return confirm('Bạn muốn hủy lịch hẹn này?');">
                                         <input type="hidden" name="csrfToken" value="<c:out value='${csrfToken}'/>">
-                                        <input type="hidden" name="id" value="${item.id}">
+                                        <input type="hidden" name="id" value="<c:out value='${item.id}'/>">
                                         <button class="btn btn-danger btn-icon" type="submit"><i class="bi bi-x-lg"></i></button>
                                     </form>
                                 </c:if>

@@ -55,7 +55,7 @@
                 </h3>
                 <p class="card-subtitle">Các trường có dấu * là thông tin bắt buộc.</p>
 
-                <form action="${pageContext.request.contextPath}/admin/pets/${pet != null ? 'update' : 'insert'}" method="POST">
+                <form action="${pageContext.request.contextPath}/admin/pets/${pet != null ? 'update' : 'insert'}" method="POST" enctype="multipart/form-data">
                     <input type="hidden" name="csrfToken" value="<c:out value='${csrfToken}'/>">
                     <c:if test="${pet != null}">
                         <input type="hidden" name="id" value="${pet.id}">
@@ -67,13 +67,20 @@
                             <option value="">-- Chọn chủ nuôi --</option>
                             <c:forEach var="customer" items="${listCustomers}">
                                 <option value="${customer.id}" ${pet != null && pet.customerId == customer.id ? 'selected' : ''}>
-                                    ${customer.fullName} - ${customer.phone}
+                                    <c:out value="${customer.fullName}"/> - <c:out value="${customer.phone}"/>
                                 </option>
                             </c:forEach>
                         </select>
                     </div>
 
                     <div class="form-grid">
+                        <div class="form-group full">
+                            <label>Ảnh thú cưng</label>
+                            <c:if test="${not empty pet.imageUrl}">
+                                <img src="${pageContext.request.contextPath}${pet.imageUrl}" alt="Pet" style="width:120px;height:90px;object-fit:cover;border-radius:8px;display:block;margin-bottom:10px;">
+                            </c:if>
+                            <input type="file" name="image" class="form-control" accept="image/png,image/jpeg,image/gif">
+                        </div>
                         <div class="form-group">
                             <label>Tên thú cưng *</label>
                             <input type="text" name="name" class="form-control" value="<c:out value='${pet.name}'/>" required>
@@ -118,4 +125,3 @@
     </main>
 </body>
 </html>
-

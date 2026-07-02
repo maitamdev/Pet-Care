@@ -48,7 +48,7 @@
             </div>
             <div class="user-profile">
                 <div class="user-avatar"><i class="bi bi-person"></i></div>
-                <span>Xin chào, <strong><c:out value="${sessionScope.user.fullName}"/></strong> (${sessionScope.user.role})</span>
+                <span>Xin chào, <strong><c:out value="${sessionScope.user.fullName}"/></strong> (<c:out value="${sessionScope.user.role}"/>)</span>
             </div>
         </header>
 
@@ -131,8 +131,8 @@
                                     <fmt:formatDate value="${app.appointmentDate}" pattern="HH:mm" />
                                 </div>
                                 <div>
-                                    <strong>${app.serviceName} cho ${app.petName}</strong>
-                                    <span>Khách hàng: ${app.customerName}</span>
+                                    <strong><c:out value="${app.serviceName}"/> cho <c:out value="${app.petName}"/></strong>
+                                    <span>Khách hàng: <c:out value="${app.customerName}"/></span>
                                 </div>
                                 <span class="status-pill status-${app.status.toLowerCase()}">
                                     <c:choose>
@@ -140,7 +140,7 @@
                                         <c:when test="${app.status == 'CONFIRMED'}">Đã xác nhận</c:when>
                                         <c:when test="${app.status == 'COMPLETED'}">Hoàn thành</c:when>
                                         <c:when test="${app.status == 'CANCELLED'}">Đã hủy</c:when>
-                                        <c:otherwise>${app.status}</c:otherwise>
+                                        <c:otherwise><c:out value="${app.status}"/></c:otherwise>
                                     </c:choose>
                                 </span>
                             </div>
@@ -171,4 +171,3 @@
     </main>
 </body>
 </html>
-

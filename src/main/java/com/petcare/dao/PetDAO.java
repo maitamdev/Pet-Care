@@ -17,22 +17,9 @@ public class PetDAO {
                      "ORDER BY p.id DESC";
         try (Connection conn = DBConnection.getConnection();
              Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+            ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
-                Pet p = new Pet();
-                p.setId(rs.getInt("id"));
-                p.setCustomerId(rs.getInt("customer_id"));
-                p.setName(rs.getString("name"));
-                p.setSpecies(rs.getString("species"));
-                p.setBreed(rs.getString("breed"));
-                
-                int age = rs.getInt("age");
-                if (!rs.wasNull()) p.setAge(age);
-                
-                p.setWeight(rs.getBigDecimal("weight"));
-                p.setGender(rs.getString("gender"));
-                p.setNotes(rs.getString("notes"));
-                p.setCreatedAt(rs.getTimestamp("created_at"));
+                Pet p = mapPet(rs);
                 p.setCustomerName(rs.getString("customer_name"));
                 list.add(p);
             }
@@ -49,20 +36,7 @@ public class PetDAO {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    Pet p = new Pet();
-                    p.setId(rs.getInt("id"));
-                    p.setCustomerId(rs.getInt("customer_id"));
-                    p.setName(rs.getString("name"));
-                    p.setSpecies(rs.getString("species"));
-                    p.setBreed(rs.getString("breed"));
-                    
-                    int age = rs.getInt("age");
-                    if (!rs.wasNull()) p.setAge(age);
-                    
-                    p.setWeight(rs.getBigDecimal("weight"));
-                    p.setGender(rs.getString("gender"));
-                    p.setNotes(rs.getString("notes"));
-                    return p;
+                    return mapPet(rs);
                 }
             }
         } catch (SQLException e) {
@@ -87,8 +61,8 @@ public class PetDAO {
     }
 
     public boolean addPet(Pet p) {
-        String sql = "INSERT INTO pets (customer_id, name, species, breed, age, weight, gender, notes) " +
-                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO pets (customer_id, name, species, breed, age, weight, gender, image_url, notes) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, p.getCustomerId());
@@ -101,7 +75,8 @@ public class PetDAO {
             
             ps.setBigDecimal(6, p.getWeight());
             ps.setString(7, p.getGender());
-            ps.setString(8, p.getNotes());
+            ps.setString(8, p.getImageUrl());
+            ps.setString(9, p.getNotes());
             
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -111,8 +86,8 @@ public class PetDAO {
     }
 
     public int addPetAndGetId(Pet p) {
-        String sql = "INSERT INTO pets (customer_id, name, species, breed, age, weight, gender, notes) " +
-                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO pets (customer_id, name, species, breed, age, weight, gender, image_url, notes) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setInt(1, p.getCustomerId());
@@ -125,7 +100,8 @@ public class PetDAO {
             
             ps.setBigDecimal(6, p.getWeight());
             ps.setString(7, p.getGender());
-            ps.setString(8, p.getNotes());
+            ps.setString(8, p.getImageUrl());
+            ps.setString(9, p.getNotes());
             
             int affectedRows = ps.executeUpdate();
             if (affectedRows > 0) {
@@ -142,7 +118,7 @@ public class PetDAO {
     }
 
     public boolean updatePet(Pet p) {
-        String sql = "UPDATE pets SET customer_id=?, name=?, species=?, breed=?, age=?, weight=?, gender=?, notes=? WHERE id=?";
+        String sql = "UPDATE pets SET customer_id=?, name=?, species=?, breed=?, age=?, weight=?, gender=?, image_url=?, notes=? WHERE id=?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, p.getCustomerId());
@@ -155,8 +131,9 @@ public class PetDAO {
             
             ps.setBigDecimal(6, p.getWeight());
             ps.setString(7, p.getGender());
-            ps.setString(8, p.getNotes());
-            ps.setInt(9, p.getId());
+            ps.setString(8, p.getImageUrl());
+            ps.setString(9, p.getNotes());
+            ps.setInt(10, p.getId());
             
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -166,7 +143,7 @@ public class PetDAO {
     }
 
     public boolean updatePetForCustomer(Pet p) {
-        String sql = "UPDATE pets SET name=?, species=?, breed=?, age=?, weight=?, gender=?, notes=? WHERE id=? AND customer_id=?";
+        String sql = "UPDATE pets SET name=?, species=?, breed=?, age=?, weight=?, gender=?, image_url=?, notes=? WHERE id=? AND customer_id=?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, p.getName());
@@ -178,9 +155,10 @@ public class PetDAO {
 
             ps.setBigDecimal(5, p.getWeight());
             ps.setString(6, p.getGender());
-            ps.setString(7, p.getNotes());
-            ps.setInt(8, p.getId());
-            ps.setInt(9, p.getCustomerId());
+            ps.setString(7, p.getImageUrl());
+            ps.setString(8, p.getNotes());
+            ps.setInt(9, p.getId());
+            ps.setInt(10, p.getCustomerId());
 
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -209,23 +187,31 @@ public class PetDAO {
             ps.setInt(1, customerId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    Pet p = new Pet();
-                    p.setId(rs.getInt("id"));
-                    p.setCustomerId(rs.getInt("customer_id"));
-                    p.setName(rs.getString("name"));
-                    p.setSpecies(rs.getString("species"));
-                    p.setBreed(rs.getString("breed"));
-                    int age = rs.getInt("age");
-                    if (!rs.wasNull()) p.setAge(age);
-                    p.setWeight(rs.getBigDecimal("weight"));
-                    p.setGender(rs.getString("gender"));
-                    p.setNotes(rs.getString("notes"));
-                    list.add(p);
+                    list.add(mapPet(rs));
                 }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return list;
+    }
+
+    private Pet mapPet(ResultSet rs) throws SQLException {
+        Pet p = new Pet();
+        p.setId(rs.getInt("id"));
+        p.setCustomerId(rs.getInt("customer_id"));
+        p.setName(rs.getString("name"));
+        p.setSpecies(rs.getString("species"));
+        p.setBreed(rs.getString("breed"));
+        int age = rs.getInt("age");
+        if (!rs.wasNull()) {
+            p.setAge(age);
+        }
+        p.setWeight(rs.getBigDecimal("weight"));
+        p.setGender(rs.getString("gender"));
+        p.setImageUrl(rs.getString("image_url"));
+        p.setNotes(rs.getString("notes"));
+        p.setCreatedAt(rs.getTimestamp("created_at"));
+        return p;
     }
 }

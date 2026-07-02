@@ -4,9 +4,11 @@ import com.petcare.dao.PetDAO;
 import com.petcare.model.Pet;
 import com.petcare.model.User;
 import com.petcare.util.CsrfUtil;
+import com.petcare.util.FileUploadUtil;
 import com.petcare.util.ValidationUtil;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -16,6 +18,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 
 @WebServlet({"/my/pets", "/my/pets/new", "/my/pets/insert", "/my/pets/edit", "/my/pets/update"})
+@MultipartConfig(maxFileSize = 2 * 1024 * 1024, maxRequestSize = 3 * 1024 * 1024)
 public class CustomerPetServlet extends HttpServlet {
     private PetDAO petDAO;
 
@@ -68,6 +71,10 @@ public class CustomerPetServlet extends HttpServlet {
         if ("/my/pets/update".equals(request.getServletPath())) {
             int id = parseInt(request.getParameter("id"));
             pet.setId(id);
+            Pet existing = petDAO.getPetById(id);
+            if (existing != null && pet.getImageUrl() == null) {
+                pet.setImageUrl(existing.getImageUrl());
+            }
             petDAO.updatePetForCustomer(pet);
             response.sendRedirect(request.getContextPath() + "/my/pets?success=updated");
         } else {
@@ -76,7 +83,7 @@ public class CustomerPetServlet extends HttpServlet {
         }
     }
 
-    private Pet buildPet(HttpServletRequest request, int customerId) {
+    private Pet buildPet(HttpServletRequest request, int customerId) throws IOException, ServletException {
         String name = request.getParameter("name");
         String species = request.getParameter("species");
         if (ValidationUtil.isEmpty(name) || ValidationUtil.isEmpty(species)) {
@@ -88,6 +95,7 @@ public class CustomerPetServlet extends HttpServlet {
         pet.setSpecies(species.trim());
         pet.setBreed(trim(request.getParameter("breed")));
         pet.setGender(trim(request.getParameter("gender")));
+        pet.setImageUrl(FileUploadUtil.saveImage(request.getPart("image"), getUploadRoot()));
         pet.setNotes(trim(request.getParameter("notes")));
 
         String age = request.getParameter("age");
@@ -128,5 +136,9 @@ public class CustomerPetServlet extends HttpServlet {
 
     private String trim(String value) {
         return value == null ? null : value.trim();
+    }
+
+    private String getUploadRoot() {
+        return getServletContext().getRealPath("/uploads");
     }
 }

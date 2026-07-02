@@ -12,6 +12,8 @@
 - [x] View my pets
 - [x] Add and edit my pets
 - [x] Profile update
+- [x] Change password
+- [x] Upload profile and pet images
 
 ## Staff
 - [x] Dashboard overview
@@ -26,15 +28,23 @@
 - [x] Manage staff accounts
 - [x] Manage invoices and payment status
 - [x] Revenue and operation reports
+- [x] Dedicated report page by year, appointment status, and top services
 
 ## Security and quality
 - [x] BCrypt password hashing with legacy SHA-256 compatibility
 - [x] CSRF token for mutating forms
 - [x] Escape dynamic JSP output
 - [x] Hide database test endpoint from non-admin users
-- [ ] Add automated tests
+- [x] Add automated tests
+- [x] Admin-only access guard for staff, service, and report management
 
 ## External integrations
 - [ ] Email/SMS reminders
-- [ ] Pet/user image upload
+- [x] Pet/user image upload
 - [ ] Online payment gateway
+
+## Suggested next improvements
+- [ ] Add DAO integration tests with a test database
+- [ ] Add email reminder job before appointment time
+- [ ] Add online payment provider sandbox flow
+- [ ] Replace inline dashboard sidebars with the shared sidebar include everywhere

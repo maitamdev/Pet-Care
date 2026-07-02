@@ -54,6 +54,8 @@ if ($password) {
 try {
     & $Mysql -uroot --default-character-set=utf8mb4 -e "source $($ProjectRoot.Replace('\','/'))/database/petcare_db.sql"
     if ($LASTEXITCODE -ne 0) { throw 'Khong the khoi tao database.' }
+    & $Mysql -uroot --default-character-set=utf8mb4 -e "source $($ProjectRoot.Replace('\','/'))/database/invoices.sql"
+    if ($LASTEXITCODE -ne 0) { throw 'Khong the cap nhat bang hoa don.' }
     & $Mysql -uroot -e "CREATE USER IF NOT EXISTS 'petcare_app'@'localhost' IDENTIFIED BY '$appPassword'; ALTER USER 'petcare_app'@'localhost' IDENTIFIED BY '$appPassword'; GRANT SELECT, INSERT, UPDATE, DELETE ON petcare_db.* TO 'petcare_app'@'localhost'; FLUSH PRIVILEGES;"
     if ($LASTEXITCODE -ne 0) { throw 'Khong the tao tai khoan database cho ung dung.' }
 } finally {

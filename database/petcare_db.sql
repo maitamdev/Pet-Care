@@ -71,7 +71,10 @@ CREATE TABLE IF NOT EXISTS appointment_details (
 
 CREATE TABLE IF NOT EXISTS invoices (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    appointment_id INT NOT NULL UNIQUE,
+    appointment_id INT NULL UNIQUE,
+    manual_customer_name VARCHAR(100),
+    manual_pet_name VARCHAR(100),
+    manual_service_name VARCHAR(150),
     total_amount DECIMAL(12, 0) NOT NULL,
     payment_method ENUM('CASH', 'TRANSFER', 'CARD'),
     status ENUM('UNPAID', 'PAID', 'CANCELLED') NOT NULL DEFAULT 'UNPAID',

@@ -93,6 +93,19 @@
     function closeInvoiceModal() {
         document.getElementById('invoiceModal').style.display = 'none';
     }
+
+    function openEditInvoiceModalFromButton(button) {
+        openEditInvoiceModal(
+            button.dataset.id,
+            button.dataset.customerName,
+            button.dataset.petName,
+            button.dataset.serviceName,
+            button.dataset.totalAmount,
+            button.dataset.paymentMethod,
+            button.dataset.status
+        );
+    }
+
     function openInvoiceDetailModal(id, customerName, petName, serviceName, totalAmount, status, paymentMethod, createdAt) {
     document.getElementById('detailInvoiceId').innerText = '#HD' + id;
     document.getElementById('detailCustomerName').innerText = customerName || 'Chưa có';
@@ -104,6 +117,19 @@
     document.getElementById('detailCreatedAt').innerText = createdAt || '';
 
     document.getElementById('invoiceDetailModal').style.display = 'flex';
+    }
+
+    function openInvoiceDetailModalFromButton(button) {
+        openInvoiceDetailModal(
+            button.dataset.id,
+            button.dataset.customerName,
+            button.dataset.petName,
+            button.dataset.serviceName,
+            button.dataset.totalAmount,
+            button.dataset.status,
+            button.dataset.paymentMethod,
+            button.dataset.createdAt
+        );
     }
 
     function closeInvoiceDetailModal() {
@@ -260,7 +286,7 @@
                     <input type="text"
                         name="keyword"
                         class="form-control"
-                        value="${keyword}"
+                        value="<c:out value='${keyword}'/>"
                         placeholder="Tìm kiếm theo khách hàng hoặc mã hóa đơn..."
                         style="max-width: 360px;">
 
@@ -319,31 +345,29 @@
                                             <button type="button"
                                                     title="Xem chi tiết"
                                                     class="btn btn-secondary btn-icon"
-                                                    onclick="openInvoiceDetailModal(
-                                                        '${item.id}',
-                                                        '${item.customerName}',
-                                                        '${item.petName}',
-                                                        '${item.serviceName}',
-                                                        '${item.totalAmount}',
-                                                        '${item.status}',
-                                                        '${item.paymentMethod}',
-                                                        '${item.createdAt}'
-                                                    )">
+                                                    data-id="<c:out value='${item.id}'/>"
+                                                    data-customer-name="<c:out value='${item.customerName}'/>"
+                                                    data-pet-name="<c:out value='${item.petName}'/>"
+                                                    data-service-name="<c:out value='${item.serviceName}'/>"
+                                                    data-total-amount="<c:out value='${item.totalAmount}'/>"
+                                                    data-status="<c:out value='${item.status}'/>"
+                                                    data-payment-method="<c:out value='${item.paymentMethod}'/>"
+                                                    data-created-at="<c:out value='${item.createdAt}'/>"
+                                                    onclick="openInvoiceDetailModalFromButton(this)">
                                                 <i class="bi bi-eye"></i>
                                             </button>
 
                                             <button type="button"
                                                     title="Sửa hóa đơn"
                                                     class="btn btn-primary btn-icon"
-                                                    onclick="openEditInvoiceModal(
-                                                        '${item.id}',
-                                                        '${item.customerName}',
-                                                        '${item.petName}',
-                                                        '${item.serviceName}',
-                                                        '${item.totalAmount}',
-                                                        '${item.paymentMethod}',
-                                                        '${item.status}'
-                                                    )">
+                                                    data-id="<c:out value='${item.id}'/>"
+                                                    data-customer-name="<c:out value='${item.customerName}'/>"
+                                                    data-pet-name="<c:out value='${item.petName}'/>"
+                                                    data-service-name="<c:out value='${item.serviceName}'/>"
+                                                    data-total-amount="<c:out value='${item.totalAmount}'/>"
+                                                    data-payment-method="<c:out value='${item.paymentMethod}'/>"
+                                                    data-status="<c:out value='${item.status}'/>"
+                                                    onclick="openEditInvoiceModalFromButton(this)">
                                                 <i class="bi bi-pencil-square"></i>
                                             </button>
 

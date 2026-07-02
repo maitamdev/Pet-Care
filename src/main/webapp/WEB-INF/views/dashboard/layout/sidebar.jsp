@@ -48,6 +48,12 @@
 
         <c:if test="${sessionScope.user.role == 'ADMIN'}">
             <li>
+                <a href="${pageContext.request.contextPath}/admin/reports"
+                   class="${param.active == 'reports' ? 'active' : ''}">
+                    <i class="bi bi-bar-chart"></i> Báo cáo
+                </a>
+            </li>
+            <li>
                 <a href="${pageContext.request.contextPath}/admin/staff"
                    class="${param.active == 'staff' ? 'active' : ''}">
                     <i class="bi bi-people"></i> Nhân sự
