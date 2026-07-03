@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -10,17 +10,9 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/dashboard.css">
 </head>
 <body class="dashboard-body">
-<aside class="sidebar">
-    <div class="sidebar-header"><div class="brand-mark"><i class="bi bi-heart-pulse"></i></div><div class="brand-copy"><strong>PetCare</strong><span>Customer portal</span></div></div>
-    <ul class="sidebar-menu">
-        <li><a href="${pageContext.request.contextPath}/my/appointments"><i class="bi bi-calendar-check"></i> Lịch hẹn</a></li>
-        <li><a class="active" href="${pageContext.request.contextPath}/my/pets"><i class="bi bi-heart"></i> Thú cưng</a></li>
-        <li><a href="${pageContext.request.contextPath}/my/invoices"><i class="bi bi-receipt"></i> Hóa đơn</a></li>
-        <li><a href="${pageContext.request.contextPath}/my/profile"><i class="bi bi-person-gear"></i> Hồ sơ</a></li>
-        <li><a href="${pageContext.request.contextPath}/home"><i class="bi bi-house"></i> Trang chủ</a></li>
-        <li><a class="logout-link" href="${pageContext.request.contextPath}/logout"><i class="bi bi-box-arrow-right"></i> Đăng xuất</a></li>
-    </ul>
-</aside>
+<jsp:include page="/WEB-INF/views/customer/layout/sidebar.jsp">
+        <jsp:param name="active" value="pets"/>
+    </jsp:include>
 <main class="main-content">
     <header class="topbar"><div><h1 class="topbar-title">Thú cưng của tôi</h1><p class="topbar-kicker">Quản lý hồ sơ cơ bản của các bé.</p></div></header>
     <div class="content-wrapper">
