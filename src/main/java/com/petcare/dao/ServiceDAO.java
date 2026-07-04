@@ -15,7 +15,7 @@ public class ServiceDAO {
 
     public List<Service> getAllServices() {
         List<Service> list = new ArrayList<>();
-        String sql = "SELECT * FROM services WHERE status = 1 ORDER BY id DESC";
+        String sql = "SELECT * FROM services WHERE status = 1 ORDER BY category ASC, id DESC";
         try (Connection conn = DBConnection.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
@@ -25,6 +25,7 @@ public class ServiceDAO {
                 s.setName(rs.getString("name"));
                 s.setPrice(rs.getBigDecimal("price"));
                 s.setDescription(rs.getString("description"));
+                s.setCategory(rs.getString("category"));
                 s.setStatus(rs.getInt("status"));
                 s.setCreatedAt(rs.getTimestamp("created_at"));
                 list.add(s);
@@ -47,6 +48,7 @@ public class ServiceDAO {
                     s.setName(rs.getString("name"));
                     s.setPrice(rs.getBigDecimal("price"));
                     s.setDescription(rs.getString("description"));
+                    s.setCategory(rs.getString("category"));
                     s.setStatus(rs.getInt("status"));
                     s.setCreatedAt(rs.getTimestamp("created_at"));
                     return s;
@@ -59,12 +61,13 @@ public class ServiceDAO {
     }
 
     public boolean addService(Service s) {
-        String sql = "INSERT INTO services (name, price, description, status) VALUES (?, ?, ?, 1)";
+        String sql = "INSERT INTO services (name, price, description, category, status) VALUES (?, ?, ?, ?, 1)";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, s.getName());
             ps.setBigDecimal(2, s.getPrice());
             ps.setString(3, s.getDescription());
+            ps.setString(4, s.getCategory());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -73,13 +76,14 @@ public class ServiceDAO {
     }
 
     public boolean updateService(Service s) {
-        String sql = "UPDATE services SET name=?, price=?, description=? WHERE id=?";
+        String sql = "UPDATE services SET name=?, price=?, description=?, category=? WHERE id=?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, s.getName());
             ps.setBigDecimal(2, s.getPrice());
             ps.setString(3, s.getDescription());
-            ps.setInt(4, s.getId());
+            ps.setString(4, s.getCategory());
+            ps.setInt(5, s.getId());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -120,6 +124,7 @@ public class ServiceDAO {
                 s.setName(rs.getString("name"));
                 s.setPrice(rs.getBigDecimal("price"));
                 s.setDescription(rs.getString("description"));
+                s.setCategory(rs.getString("category"));
                 s.setStatus(rs.getInt("status"));
                 s.setCreatedAt(rs.getTimestamp("created_at"));
                 list.add(s);
@@ -147,6 +152,7 @@ public class ServiceDAO {
                     s.setName(rs.getString("name"));
                     s.setPrice(rs.getBigDecimal("price"));
                     s.setDescription(rs.getString("description"));
+                    s.setCategory(rs.getString("category"));
                     s.setStatus(rs.getInt("status"));
                     s.setCreatedAt(rs.getTimestamp("created_at"));
                     list.add(s);
@@ -184,6 +190,7 @@ public class ServiceDAO {
                     s.setName(rs.getString("name"));
                     s.setPrice(rs.getBigDecimal("price"));
                     s.setDescription(rs.getString("description"));
+                    s.setCategory(rs.getString("category"));
                     s.setStatus(rs.getInt("status"));
                     s.setCreatedAt(rs.getTimestamp("created_at"));
                     list.add(s);

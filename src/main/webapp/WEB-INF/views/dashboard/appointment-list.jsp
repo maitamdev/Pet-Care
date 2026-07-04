@@ -1,4 +1,4 @@
-﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
@@ -103,9 +103,15 @@
                                     <td><strong><c:out value="${item.customerName}"/></strong></td>
                                     <td><c:out value="${item.petName}"/></td>
                                     <td>
-                                        <span class="cell-title"><c:out value="${item.serviceName}"/></span>
-                                        <span class="cell-note" style="color: var(--brand); font-weight: bold;">
-                                            <fmt:formatNumber value="${item.priceAtBooking}" type="currency" currencySymbol="đ" maxFractionDigits="0" />
+                                        <div class="cell-title"><c:out value="${item.serviceName}"/></div>
+                                        <c:if test="${item.visitType == 'HOME'}">
+                                            <div class="cell-note" style="color: var(--primary-color); margin-top: 4px;"><i class="bi bi-house-door"></i> Tại nhà: <c:out value="${item.address}"/></div>
+                                        </c:if>
+                                        <c:if test="${item.visitType == 'CLINIC'}">
+                                            <div class="cell-note text-muted" style="margin-top: 4px;"><i class="bi bi-building"></i> Tại phòng khám</div>
+                                        </c:if>
+                                        <span class="cell-note" style="color: var(--brand); font-weight: bold; margin-top: 4px;">
+                                            Tổng: <fmt:formatNumber value="${item.priceAtBooking}" type="currency" currencySymbol="đ" maxFractionDigits="0" />
                                         </span>
                                     </td>
                                     <td>

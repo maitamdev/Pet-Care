@@ -12,11 +12,12 @@ public class User {
     private String specialty;
     private String role;
     private int status;
+    private String address;
 
     public User() {
     }
 
-    public User(int id, String fullName, String username, String password, String phone, String email, String imageUrl, String specialty, String role, int status) {
+    public User(int id, String fullName, String username, String password, String phone, String email, String imageUrl, String specialty, String role, int status, String address) {
         this.id = id;
         this.fullName = fullName;
         this.username = username;
@@ -27,6 +28,7 @@ public class User {
         this.specialty = specialty;
         this.role = role;
         this.status = status;
+        this.address = address;
     }
 
     public int getId() {
@@ -107,6 +109,14 @@ public class User {
 
     public void setStatus(int status) {
         this.status = status;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     @Override

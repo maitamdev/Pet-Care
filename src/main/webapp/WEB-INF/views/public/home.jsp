@@ -68,6 +68,22 @@
         </div>
     </section>
 
+    <!-- Video Introduction Section -->
+    <section class="section video-intro-section" style="background: #FAF6F0; border-top: 1px solid var(--border-default); border-bottom: 1px solid var(--border-default); padding: 60px 0;">
+        <div class="container" style="max-width: 900px; text-align: center;">
+            <h2 class="section-title" style="margin-bottom: 20px;">Hành Trình Yêu Thương Tại PetCare</h2>
+            <p style="color: var(--text-muted); margin-bottom: 40px; font-size: 1.1rem; font-family: 'Fredoka', sans-serif;">
+                Xem video giới thiệu để hiểu thêm về dịch vụ đặt lịch và sự chăm sóc tận tâm của chúng tôi dành cho thú cưng của bạn.
+            </p>
+            <div style="position: relative; border-radius: var(--radius-xl); border: 2px solid var(--border-default); padding: 16px; background: var(--bg-card); box-shadow: var(--shadow-flat-default);">
+                <video autoplay loop muted playsinline width="100%" style="border-radius: var(--radius-lg); display: block;">
+                    <source src="${pageContext.request.contextPath}/assets/videos/intro.mp4" type="video/mp4">
+                    Trình duyệt của bạn không hỗ trợ hiển thị video.
+                </video>
+            </div>
+        </div>
+    </section>
+
     <section id="services" class="section services-section">
         <div class="container">
             <h2 class="section-title">Dịch vụ của chúng tôi</h2>

@@ -1,4 +1,4 @@
-﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -51,6 +51,19 @@
                     <div class="form-group">
                         <label>Tên dịch vụ *</label>
                         <input type="text" name="name" class="form-control" value="<c:out value='${service.name}'/>" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Nhóm dịch vụ (Category) *</label>
+                        <select name="category" class="form-control" required>
+                            <option value="">-- Chọn nhóm dịch vụ --</option>
+                            <option value="Khám tổng quát & Phòng bệnh" ${service.category == 'Khám tổng quát & Phòng bệnh' ? 'selected' : ''}>Khám tổng quát & Phòng bệnh</option>
+                            <option value="Khám chuyên khoa" ${service.category == 'Khám chuyên khoa' ? 'selected' : ''}>Khám chuyên khoa</option>
+                            <option value="Chẩn đoán hình ảnh & Xét nghiệm" ${service.category == 'Chẩn đoán hình ảnh & Xét nghiệm' ? 'selected' : ''}>Chẩn đoán hình ảnh & Xét nghiệm</option>
+                            <option value="Phẫu thuật & Điều trị" ${service.category == 'Phẫu thuật & Điều trị' ? 'selected' : ''}>Phẫu thuật & Điều trị</option>
+                            <option value="Spa & Grooming" ${service.category == 'Spa & Grooming' ? 'selected' : ''}>Spa & Grooming</option>
+                            <option value="Dịch vụ khác" ${service.category == 'Dịch vụ khác' ? 'selected' : ''}>Dịch vụ khác</option>
+                        </select>
                     </div>
 
                     <div class="form-group">

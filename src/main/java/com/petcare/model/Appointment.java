@@ -2,6 +2,7 @@ package com.petcare.model;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.List;
 
 public class Appointment {
     private int id;
@@ -14,6 +15,8 @@ public class Appointment {
     private String diagnosis;
     private Timestamp createdAt;
     private Timestamp updatedAt;
+    private String visitType;
+    private String address;
 
     // Join fields for easy display
     private String customerName;
@@ -24,6 +27,9 @@ public class Appointment {
     private int serviceId;
     private String serviceName;
     private BigDecimal priceAtBooking;
+    
+    // Support for multiple services
+    private List<Integer> selectedServiceIds;
 
     // Getters and Setters
     public int getId() { return id; }
@@ -56,6 +62,12 @@ public class Appointment {
     public Timestamp getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(Timestamp updatedAt) { this.updatedAt = updatedAt; }
 
+    public String getVisitType() { return visitType; }
+    public void setVisitType(String visitType) { this.visitType = visitType; }
+
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
+
     public String getCustomerName() { return customerName; }
     public void setCustomerName(String customerName) { this.customerName = customerName; }
 
@@ -64,6 +76,9 @@ public class Appointment {
 
     public String getStaffName() { return staffName; }
     public void setStaffName(String staffName) { this.staffName = staffName; }
+
+    public List<Integer> getSelectedServiceIds() { return selectedServiceIds; }
+    public void setSelectedServiceIds(List<Integer> selectedServiceIds) { this.selectedServiceIds = selectedServiceIds; }
 
     public int getServiceId() { return serviceId; }
     public void setServiceId(int serviceId) { this.serviceId = serviceId; }

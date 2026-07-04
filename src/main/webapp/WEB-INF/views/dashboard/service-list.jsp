@@ -1,4 +1,4 @@
-﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
@@ -80,6 +80,7 @@
                         <thead>
                             <tr>
                                 <th>ID</th>
+                                <th>Nhóm dịch vụ</th>
                                 <th>Tên dịch vụ</th>
                                 <th>Giá (VNĐ)</th>
                                 <th>Mô tả</th>
@@ -90,6 +91,7 @@
                             <c:forEach var="item" items="${listServices}">
                                 <tr>
                                     <td>#${item.id}</td>
+                                    <td><span style="font-weight: 500; color: var(--text-light);"><c:out value="${item.category}"/></span></td>
                                     <td><span class="cell-title"><c:out value="${item.name}"/></span></td>
                                     <td><strong><fmt:formatNumber value="${item.price}" pattern="#,###"/></strong></td>
                                     <td><c:out value="${item.description}"/></td>

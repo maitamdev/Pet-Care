@@ -15,7 +15,7 @@ import java.util.List;
 public class UserDAO {
 
     public User login(String username, String password) {
-        String sql = "SELECT id, full_name, username, password, phone, email, image_url, specialty, role, status "
+        String sql = "SELECT id, full_name, username, password, phone, email, image_url, specialty, role, status, address "
                    + "FROM users "
                    + "WHERE username = ? AND status = 1";
 
@@ -37,6 +37,7 @@ public class UserDAO {
                     user.setSpecialty(rs.getString("specialty"));
                     user.setRole(rs.getString("role"));
                     user.setStatus(rs.getInt("status"));
+                    user.setAddress(rs.getString("address"));
                     return user;
                 }
             }
@@ -225,6 +226,21 @@ public class UserDAO {
         return false;
     }
 
+    public boolean updateContactInfo(int userId, String fullName, String phone, String address) {
+        String sql = "UPDATE users SET full_name = ?, phone = ?, address = ? WHERE id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, fullName);
+            ps.setString(2, phone);
+            ps.setString(3, address);
+            ps.setInt(4, userId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     private User mapUser(ResultSet rs) throws SQLException {
         User u = new User();
         u.setId(rs.getInt("id"));
@@ -237,6 +253,14 @@ public class UserDAO {
         u.setSpecialty(rs.getString("specialty"));
         u.setRole(rs.getString("role"));
         u.setStatus(rs.getInt("status"));
+        
+        // Try to get address if column exists in the result set
+        try {
+            u.setAddress(rs.getString("address"));
+        } catch (SQLException e) {
+            // Ignored, column might not be requested in some queries
+        }
+        
         return u;
     }
 }

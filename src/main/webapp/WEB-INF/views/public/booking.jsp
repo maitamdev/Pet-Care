@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
 <html lang="vi">
 
@@ -25,8 +26,8 @@
             border-radius: var(--radius-xl);
             box-shadow: var(--shadow-flat-orange);
             padding: 48px;
-            width: 100%;
-            max-width: 1100px;
+            width: 95%;
+            max-width: 1500px;
         }
 
         .booking-card h2 {
@@ -161,7 +162,7 @@
             background: #FFFFFF;
             border: 2px solid var(--border-default);
             border-radius: var(--radius-md);
-            padding: 20px 16px;
+            padding: 16px 12px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -185,8 +186,8 @@
         }
         
         .card-item-icon {
-            font-size: 2rem;
-            margin-bottom: 12px;
+            font-size: 1.8rem;
+            margin-bottom: 8px;
             color: var(--primary);
             display: inline-flex;
             align-items: center;
@@ -337,8 +338,8 @@
         /* 2-Column Booking Layout */
         .booking-form-grid {
             display: grid;
-            grid-template-columns: 1.15fr 0.85fr;
-            gap: 36px;
+            grid-template-columns: 1.8fr 1fr;
+            gap: 40px;
             align-items: start;
             margin-top: 24px;
         }
@@ -513,55 +514,44 @@
                         </div>
                         
                         <div class="form-group">
-                            <div class="service-cards-grid">
+                            <input type="text" id="serviceSearchInput" class="form-control" placeholder="Tìm kiếm dịch vụ (VD: Khám tổng quát, Siêu âm)..." onkeyup="filterServices()" style="margin-bottom: 12px; border-radius: 8px;">
+                            
+                            <div class="category-tabs" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;">
+                                <button type="button" class="btn btn-sm btn-primary category-tab" data-category="all" onclick="filterByCategory('all', this)" style="border-radius: 20px; padding: 4px 12px;">Tất cả</button>
+                                <c:set var="lastCat" value="" />
                                 <c:forEach var="service" items="${listServices}">
-                                    <div class="card-item service-card-item" data-value="${service.id}" onclick="selectServiceCard('${service.id}')">
+                                    <c:if test="${service.category != lastCat}">
+                                        <button type="button" class="btn btn-sm btn-outline-primary category-tab" data-category="${service.category}" onclick="filterByCategory('${service.category}', this)" style="border-radius: 20px; padding: 4px 12px;">
+                                            <c:out value="${service.category}"/>
+                                        </button>
+                                        <c:set var="lastCat" value="${service.category}" />
+                                    </c:if>
+                                </c:forEach>
+                            </div>
+
+                            <div class="service-cards-grid" id="serviceCardsGrid" style="max-height: 650px; overflow-y: auto; padding-right: 4px; padding-bottom: 4px;">
+                                <c:forEach var="service" items="${listServices}">
+                                    <div class="card-item service-card-item" data-value="${service.id}" data-category="${service.category}" data-name="${service.name}" onclick="selectServiceCard('${service.id}')">
                                         <div class="card-item-check"><i class="bi bi-check-lg"></i></div>
                                         <div class="card-item-icon">
                                             <c:choose>
-                                                <c:when test="${service.name == 'Khám tổng quát'}">
-                                                    <i class="bi bi-clipboard2-pulse-fill"></i>
-                                                </c:when>
-                                                <c:when test="${service.name == 'Tiêm phòng'}">
-                                                    <i class="bi bi-shield-plus"></i>
-                                                </c:when>
-                                                <c:when test="${service.name == 'Tẩy giun'}">
-                                                    <i class="bi bi-capsule"></i>
-                                                </c:when>
-                                                <c:when test="${service.name == 'Cắt tỉa lông' || service.name == 'Tắm & Grooming'}">
-                                                    <i class="bi bi-scissors"></i>
-                                                </c:when>
-                                                <c:when test="${service.name == 'Siêu âm'}">
-                                                    <i class="bi bi-activity"></i>
-                                                </c:when>
-                                                <c:when test="${service.name == 'Khám da liễu'}">
-                                                    <i class="bi bi-microscope"></i>
-                                                </c:when>
-                                                <c:when test="${service.name == 'Triệt sản thẩm mỹ'}">
-                                                    <i class="bi bi-heart-pulse-fill"></i>
-                                                </c:when>
-                                                <c:when test="${service.name == 'Xét nghiệm máu'}">
-                                                    <i class="bi bi-droplet-fill"></i>
-                                                </c:when>
-                                                <c:when test="${service.name == 'Khám & Lấy cao răng'}">
-                                                    <i class="bi bi-emoji-smile-fill"></i>
-                                                </c:when>
-                                                <c:when test="${service.name == 'Cấp cứu 24/7'}">
-                                                    <i class="bi bi-telephone-fill" style="color: #DC3545;"></i>
-                                                </c:when>
-                                                <c:when test="${service.name == 'Chụp X-Quang'}">
-                                                    <i class="bi bi-file-earmark-medical-fill"></i>
-                                                </c:when>
-                                                <c:when test="${service.name == 'Khách sạn thú cưng'}">
-                                                    <i class="bi bi-house-heart-fill"></i>
-                                                </c:when>
-                                                <c:otherwise>
-                                                    <i class="bi bi-heart-fill"></i>
-                                                </c:otherwise>
+                                                <c:when test="${service.name == 'Khám tổng quát'}"><i class="bi bi-clipboard2-pulse-fill"></i></c:when>
+                                                <c:when test="${service.name == 'Tiêm phòng'}"><i class="bi bi-shield-plus"></i></c:when>
+                                                <c:when test="${service.name == 'Tẩy giun'}"><i class="bi bi-capsule"></i></c:when>
+                                                <c:when test="${service.name == 'Cắt tỉa lông' || service.name == 'Tắm & Grooming'}"><i class="bi bi-scissors"></i></c:when>
+                                                <c:when test="${service.name == 'Siêu âm'}"><i class="bi bi-activity"></i></c:when>
+                                                <c:when test="${service.name == 'Khám da liễu'}"><i class="bi bi-microscope"></i></c:when>
+                                                <c:when test="${service.name == 'Triệt sản thẩm mỹ'}"><i class="bi bi-heart-pulse-fill"></i></c:when>
+                                                <c:when test="${service.name == 'Xét nghiệm máu'}"><i class="bi bi-droplet-fill"></i></c:when>
+                                                <c:when test="${service.name == 'Khám & Lấy cao răng'}"><i class="bi bi-emoji-smile-fill"></i></c:when>
+                                                <c:when test="${service.name == 'Cấp cứu 24/7'}"><i class="bi bi-telephone-fill" style="color: #DC3545;"></i></c:when>
+                                                <c:when test="${service.name == 'Chụp X-Quang'}"><i class="bi bi-file-earmark-medical-fill"></i></c:when>
+                                                <c:when test="${service.name == 'Khách sạn thú cưng'}"><i class="bi bi-house-heart-fill"></i></c:when>
+                                                <c:otherwise><i class="bi bi-heart-fill"></i></c:otherwise>
                                             </c:choose>
                                         </div>
                                         <div class="card-item-title"><c:out value="${service.name}"/></div>
-                                        <div class="card-item-price">${service.price}đ</div>
+                                        <div class="card-item-price"><fmt:formatNumber value="${service.price}" pattern="#,###"/>đ</div>
                                     </div>
                                 </c:forEach>
                             </div>
@@ -577,12 +567,8 @@
                                 <span class="service-consult-action">Liên hệ tư vấn <i class="bi bi-arrow-right"></i></span>
                             </a>
                             
-                            <!-- Hidden native select for backend compatibility -->
-                            <select name="serviceId" id="serviceId" class="form-control" required style="display: none;">
-                                <c:forEach var="service" items="${listServices}">
-                                    <option value="${service.id}"><c:out value="${service.name}"/> (${service.price}đ)</option>
-                                </c:forEach>
-                            </select>
+                            <!-- Hidden inputs for multiple service IDs -->
+                            <div id="hiddenServiceInputs"></div>
                         </div>
                     </div>
                     
@@ -594,6 +580,29 @@
                             <h3 class="step-title">Chọn lịch hẹn</h3>
                         </div>
                         
+                        <div class="form-group">
+                            <label>Hình thức khám</label>
+                            <div class="segmented-control" style="margin-bottom: 12px;">
+                                <button type="button" class="segment-btn active" data-value="CLINIC" onclick="selectVisitType(this)">Tại phòng khám</button>
+                                <button type="button" class="segment-btn" data-value="HOME" onclick="selectVisitType(this)">Tại nhà</button>
+                            </div>
+                            <input type="hidden" name="visitType" id="visitType" value="CLINIC">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="contactName">Người liên hệ *</label>
+                            <input type="text" name="contactName" id="contactName" class="form-control" required value="${sessionScope.user.fullName}">
+                        </div>
+                        <div class="form-group">
+                            <label for="contactPhone">Số điện thoại liên hệ</label>
+                            <input type="tel" name="contactPhone" id="contactPhone" class="form-control" placeholder="Dùng để liên hệ hoặc xuất hóa đơn" value="${sessionScope.user.phone}">
+                        </div>
+
+                        <div class="form-group" id="addressSection" style="display: none;">
+                            <label for="contactAddress">Địa chỉ phục vụ *</label>
+                            <input type="text" name="contactAddress" id="contactAddress" class="form-control" placeholder="Số nhà, ngõ/ngách, đường, phường/xã..." value="${sessionScope.user.address}">
+                        </div>
+
                         <div class="form-group">
                             <label for="date">Ngày khám *</label>
                             <input type="date" name="date" id="date" class="form-control" required min="<%= new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date()) %>">
@@ -658,22 +667,68 @@
             toggleQuickPetFields();
         }
 
-        // Select Service
+        // Array to store selected service IDs
+        let selectedServices = [];
+
+        // Select Service (Multiple)
         function selectServiceCard(serviceId) {
-            // Remove active classes
-            document.querySelectorAll('.service-card-item').forEach(card => {
-                card.classList.remove('selected');
-            });
-            
-            // Add active class to selected card
             const selectedCard = document.querySelector('.service-card-item[data-value="' + serviceId + '"]');
-            if (selectedCard) {
+            if (!selectedCard) return;
+
+            const index = selectedServices.indexOf(serviceId);
+            if (index === -1) {
+                // Add to selection
+                selectedServices.push(serviceId);
                 selectedCard.classList.add('selected');
+            } else {
+                // Remove from selection
+                selectedServices.splice(index, 1);
+                selectedCard.classList.remove('selected');
             }
+
+            // Update hidden inputs container
+            const container = document.getElementById('hiddenServiceInputs');
+            if (container) {
+                container.innerHTML = '';
+                selectedServices.forEach(id => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'serviceIds';
+                    input.value = id;
+                    container.appendChild(input);
+                });
+            }
+        }
+
+        function filterByCategory(category, btn) {
+            // Update active button styling
+            document.querySelectorAll('.category-tab').forEach(b => {
+                b.classList.remove('btn-primary');
+                b.classList.add('btn-outline-primary');
+            });
+            btn.classList.remove('btn-outline-primary');
+            btn.classList.add('btn-primary');
             
-            // Update hidden select
-            const serviceSelect = document.getElementById('serviceId');
-            serviceSelect.value = serviceId;
+            filterServices();
+        }
+
+        function filterServices() {
+            const searchText = document.getElementById('serviceSearchInput').value.toLowerCase();
+            const activeTab = document.querySelector('.category-tab.btn-primary').getAttribute('data-category');
+            
+            document.querySelectorAll('.service-card-item').forEach(card => {
+                const name = card.getAttribute('data-name').toLowerCase();
+                const category = card.getAttribute('data-category');
+                
+                const matchesSearch = name.includes(searchText);
+                const matchesCategory = activeTab === 'all' || activeTab === category;
+                
+                if (matchesSearch && matchesCategory) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
         }
 
         function selectSegment(inputName, btnEl) {
@@ -688,6 +743,22 @@
             
             // Set value
             document.getElementById(inputName).value = btnEl.getAttribute('data-value');
+        }
+
+        function selectVisitType(btnEl) {
+            selectSegment('visitType', btnEl);
+
+            const visitType = btnEl.getAttribute('data-value');
+            const addressSection = document.getElementById('addressSection');
+            const addressInput = document.getElementById('contactAddress');
+
+            if (visitType === 'HOME') {
+                addressSection.style.display = 'block';
+                addressInput.setAttribute('required', 'required');
+            } else {
+                addressSection.style.display = 'none';
+                addressInput.removeAttribute('required');
+            }
         }
 
         // Set default values and setup initial UI state
@@ -705,11 +776,8 @@
                 selectPetCard('-1');
             }
 
-            // Initialize default service card selection
-            const serviceSelect = document.getElementById('serviceId');
-            if (serviceSelect && serviceSelect.options.length > 0) {
-                selectServiceCard(serviceSelect.value);
-            }
+            // Optional: You could auto-select the first service if desired, 
+            // but for multiple selection it is usually better to start empty.
         });
 
         // Mobile Menu toggle

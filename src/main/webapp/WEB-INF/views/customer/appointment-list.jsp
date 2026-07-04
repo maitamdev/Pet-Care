@@ -1,4 +1,4 @@
-﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
@@ -33,7 +33,15 @@
                         <tr>
                             <td>#${item.id}</td>
                             <td><span class="cell-title"><c:out value="${item.petName}"/></span><span class="cell-note"><c:out value="${item.reason}"/></span></td>
-                            <td><c:out value="${item.serviceName}"/></td>
+                            <td>
+                                <div><c:out value="${item.serviceName}"/></div>
+                                <c:if test="${item.visitType == 'HOME'}">
+                                    <div class="cell-note" style="color: var(--primary-color); margin-top: 4px;"><i class="bi bi-house-door"></i> Tại nhà: <c:out value="${item.address}"/></div>
+                                </c:if>
+                                <c:if test="${item.visitType == 'CLINIC'}">
+                                    <div class="cell-note text-muted" style="margin-top: 4px;"><i class="bi bi-building"></i> Tại phòng khám</div>
+                                </c:if>
+                            </td>
                             <td><strong><fmt:formatDate value="${item.appointmentDate}" pattern="dd/MM/yyyy"/></strong><span class="cell-note"><fmt:formatDate value="${item.appointmentDate}" pattern="HH:mm"/></span></td>
                             <td><c:out value="${empty item.staffName ? 'Chưa phân công' : item.staffName}"/></td>
                             <td><span class="status-pill status-${item.status.toLowerCase()}"><c:out value="${item.status}"/></span></td>

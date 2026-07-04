@@ -132,6 +132,12 @@
             <p>Lịch khám của bé cưng đã được ghi nhận. Đội ngũ PetCare sẽ liên hệ sớm nhất để xác nhận lại lịch hẹn của bạn.</p>
 
             <div class="success-badge">
+                <c:if test="${not empty sessionScope.lastAppointmentId}">
+                <div class="success-badge-row" style="border-bottom: 1px dashed rgba(42, 102, 80, 0.2); padding-bottom: 8px; margin-bottom: 8px;">
+                    <span class="label">Mã đặt lịch:</span>
+                    <span class="val" style="font-weight: 800; font-size: 1.1rem; color: var(--primary-color);">#${sessionScope.lastAppointmentId}</span>
+                </div>
+                </c:if>
                 <div class="success-badge-row">
                     <span class="label">Trạng thái:</span>
                     <span class="val" style="color: var(--accent-green);"><i class="bi bi-hourglass-split"></i> Đang chờ xác nhận</span>

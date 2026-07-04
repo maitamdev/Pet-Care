@@ -14,8 +14,8 @@ public class AppointmentDAO {
     private static final String CANCELLED = "CANCELLED";
 
     public boolean addAppointment(Appointment app) {
-        String insertAppointment = "INSERT INTO appointments (customer_id, pet_id, appointment_date, reason, status) VALUES (?, ?, ?, ?, ?)";
-        String insertDetail = "INSERT INTO appointment_details (appointment_id, service_id, price_at_booking) VALUES (?, ?, ?)";
+        String insertAppointment = "INSERT INTO appointments (customer_id, pet_id, appointment_date, reason, status, visit_type, address) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String insertDetail = "INSERT INTO appointment_details (appointment_id, service_id, price_at_booking) SELECT ?, id, price FROM services WHERE id = ?";
         
         Connection conn = null;
         PreparedStatement psApp = null;
@@ -33,6 +33,8 @@ public class AppointmentDAO {
             psApp.setTimestamp(3, app.getAppointmentDate());
             psApp.setString(4, app.getReason());
             psApp.setString(5, "PENDING"); // Default status
+            psApp.setString(6, app.getVisitType() != null ? app.getVisitType() : "CLINIC");
+            psApp.setString(7, app.getAddress());
 
             int affectedRows = psApp.executeUpdate();
             if (affectedRows == 0) {
@@ -48,15 +50,23 @@ public class AppointmentDAO {
                 throw new SQLException("Creating appointment failed, no ID obtained.");
             }
 
-            // 2. Insert into appointment_details
+            // 2. Insert into appointment_details for each selected service
             psDetail = conn.prepareStatement(insertDetail);
-            psDetail.setInt(1, appointmentId);
-            psDetail.setInt(2, app.getServiceId());
-            psDetail.setBigDecimal(3, app.getPriceAtBooking());
-
-            psDetail.executeUpdate();
+            if (app.getSelectedServiceIds() != null && !app.getSelectedServiceIds().isEmpty()) {
+                for (Integer sid : app.getSelectedServiceIds()) {
+                    psDetail.setInt(1, appointmentId);
+                    psDetail.setInt(2, sid);
+                    psDetail.executeUpdate();
+                }
+            } else {
+                // Fallback for single service (backward compatibility)
+                psDetail.setInt(1, appointmentId);
+                psDetail.setInt(2, app.getServiceId());
+                psDetail.executeUpdate();
+            }
 
             conn.commit(); // Commit transaction
+            app.setId(appointmentId); // Set generated ID back to the object
             return true;
 
         } catch (SQLException e) {
@@ -101,13 +111,15 @@ public class AppointmentDAO {
 
     public List<Appointment> getAppointmentsByCustomerId(int customerId) {
         List<Appointment> list = new ArrayList<>();
-        String sql = "SELECT a.*, p.name as pet_name, staff.full_name as staff_name, s.name as service_name, ad.price_at_booking " +
+        String sql = "SELECT a.*, p.name as pet_name, staff.full_name as staff_name, " +
+                     "GROUP_CONCAT(s.name SEPARATOR ', ') as service_name, SUM(ad.price_at_booking) as price_at_booking " +
                      "FROM appointments a " +
                      "JOIN pets p ON a.pet_id = p.id " +
                      "LEFT JOIN users staff ON a.staff_id = staff.id " +
-                     "JOIN appointment_details ad ON a.id = ad.appointment_id " +
-                     "JOIN services s ON ad.service_id = s.id " +
+                     "LEFT JOIN appointment_details ad ON a.id = ad.appointment_id " +
+                     "LEFT JOIN services s ON ad.service_id = s.id " +
                      "WHERE a.customer_id = ? " +
+                     "GROUP BY a.id " +
                      "ORDER BY a.appointment_date DESC";
 
         try (Connection conn = DBConnection.getConnection();
@@ -132,6 +144,8 @@ public class AppointmentDAO {
                     app.setStaffName(rs.getString("staff_name"));
                     app.setServiceName(rs.getString("service_name"));
                     app.setPriceAtBooking(rs.getBigDecimal("price_at_booking"));
+                    app.setVisitType(rs.getString("visit_type"));
+                    app.setAddress(rs.getString("address"));
                     
                     list.add(app);
                 }
@@ -188,14 +202,16 @@ public class AppointmentDAO {
 
     public List<Appointment> getTodayAppointments() {
         List<Appointment> list = new ArrayList<>();
-        String sql = "SELECT a.*, p.name as pet_name, u.full_name as customer_name, staff.full_name as staff_name, s.name as service_name, ad.price_at_booking " +
+        String sql = "SELECT a.*, p.name as pet_name, u.full_name as customer_name, staff.full_name as staff_name, " +
+                     "GROUP_CONCAT(s.name SEPARATOR ', ') as service_name, SUM(ad.price_at_booking) as price_at_booking " +
                      "FROM appointments a " +
                      "JOIN pets p ON a.pet_id = p.id " +
                      "JOIN users u ON a.customer_id = u.id " +
                      "LEFT JOIN users staff ON a.staff_id = staff.id " +
-                     "JOIN appointment_details ad ON a.id = ad.appointment_id " +
-                     "JOIN services s ON ad.service_id = s.id " +
+                     "LEFT JOIN appointment_details ad ON a.id = ad.appointment_id " +
+                     "LEFT JOIN services s ON ad.service_id = s.id " +
                      "WHERE DATE(a.appointment_date) = CURDATE() " +
+                     "GROUP BY a.id " +
                      "ORDER BY a.appointment_date ASC";
         try (Connection conn = DBConnection.getConnection();
              Statement stmt = conn.createStatement();
@@ -217,6 +233,8 @@ public class AppointmentDAO {
                 app.setPetName(rs.getString("pet_name"));
                 app.setServiceName(rs.getString("service_name"));
                 app.setPriceAtBooking(rs.getBigDecimal("price_at_booking"));
+                app.setVisitType(rs.getString("visit_type"));
+                app.setAddress(rs.getString("address"));
                 list.add(app);
             }
         } catch (SQLException e) {
@@ -227,13 +245,15 @@ public class AppointmentDAO {
 
     public List<Appointment> getAllAppointments() {
         List<Appointment> list = new ArrayList<>();
-        String sql = "SELECT a.*, p.name as pet_name, u.full_name as customer_name, staff.full_name as staff_name, s.name as service_name, ad.price_at_booking " +
+        String sql = "SELECT a.*, p.name as pet_name, u.full_name as customer_name, staff.full_name as staff_name, " +
+                     "GROUP_CONCAT(s.name SEPARATOR ', ') as service_name, SUM(ad.price_at_booking) as price_at_booking " +
                      "FROM appointments a " +
                      "JOIN pets p ON a.pet_id = p.id " +
                      "JOIN users u ON a.customer_id = u.id " +
                      "LEFT JOIN users staff ON a.staff_id = staff.id " +
-                     "JOIN appointment_details ad ON a.id = ad.appointment_id " +
-                     "JOIN services s ON ad.service_id = s.id " +
+                     "LEFT JOIN appointment_details ad ON a.id = ad.appointment_id " +
+                     "LEFT JOIN services s ON ad.service_id = s.id " +
+                     "GROUP BY a.id " +
                      "ORDER BY a.appointment_date DESC";
         try (Connection conn = DBConnection.getConnection();
              Statement stmt = conn.createStatement();
@@ -255,6 +275,8 @@ public class AppointmentDAO {
                 app.setPetName(rs.getString("pet_name"));
                 app.setServiceName(rs.getString("service_name"));
                 app.setPriceAtBooking(rs.getBigDecimal("price_at_booking"));
+                app.setVisitType(rs.getString("visit_type"));
+                app.setAddress(rs.getString("address"));
                 list.add(app);
             }
         } catch (SQLException e) {

@@ -8,6 +8,7 @@ public class Service {
     private String name;
     private BigDecimal price;
     private String description;
+    private String category;
     private int status;
     private Timestamp createdAt;
 
@@ -21,6 +22,8 @@ public class Service {
     public void setPrice(BigDecimal price) { this.price = price; }
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
+    public String getCategory() { return category; }
+    public void setCategory(String category) { this.category = category; }
     public int getStatus() { return status; }
     public void setStatus(int status) { this.status = status; }
     public Timestamp getCreatedAt() { return createdAt; }

@@ -112,6 +112,7 @@ public class ServiceServlet extends HttpServlet {
     private void insertService(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String name = request.getParameter("name");
+        String category = request.getParameter("category");
         String priceRaw = request.getParameter("price");
         String description = request.getParameter("description");
 
@@ -144,6 +145,7 @@ public class ServiceServlet extends HttpServlet {
 
         Service newService = new Service();
         newService.setName(name.trim());
+        newService.setCategory(category);
         newService.setPrice(price);
         newService.setDescription(description);
 
@@ -155,12 +157,14 @@ public class ServiceServlet extends HttpServlet {
             throws ServletException, IOException {
         int id = Integer.parseInt(request.getParameter("id"));
         String name = request.getParameter("name");
+        String category = request.getParameter("category");
         String priceRaw = request.getParameter("price");
         String description = request.getParameter("description");
 
         Service s = new Service();
         s.setId(id);
         s.setName(name);
+        s.setCategory(category);
         s.setDescription(description);
 
         if (name == null || name.trim().isEmpty()) {
@@ -195,6 +199,7 @@ public class ServiceServlet extends HttpServlet {
         }
 
         s.setName(name.trim());
+        s.setCategory(category);
         s.setPrice(price);
         s.setDescription(description);
 

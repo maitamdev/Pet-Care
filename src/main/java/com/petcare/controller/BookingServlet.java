@@ -3,6 +3,7 @@ package com.petcare.controller;
 import com.petcare.dao.AppointmentDAO;
 import com.petcare.dao.PetDAO;
 import com.petcare.dao.ServiceDAO;
+import com.petcare.dao.UserDAO;
 import com.petcare.model.Appointment;
 import com.petcare.model.Pet;
 import com.petcare.model.Service;
@@ -22,6 +23,7 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
+import java.util.ArrayList;
 
 @WebServlet({"/booking", "/booking/success"})
 public class BookingServlet extends HttpServlet {
@@ -29,12 +31,14 @@ public class BookingServlet extends HttpServlet {
     private PetDAO petDAO;
     private ServiceDAO serviceDAO;
     private AppointmentDAO appointmentDAO;
+    private UserDAO userDAO;
 
     @Override
     public void init() {
         petDAO = new PetDAO();
         serviceDAO = new ServiceDAO();
         appointmentDAO = new AppointmentDAO();
+        userDAO = new UserDAO();
     }
 
     @Override
@@ -94,25 +98,50 @@ public class BookingServlet extends HttpServlet {
                 throw new ServletException("Hồ sơ thú cưng không thuộc tài khoản của bạn.");
             }
 
-            int serviceId = parseInt(request.getParameter("serviceId"), -1);
+            String[] serviceIdStrings = request.getParameterValues("serviceIds");
             String dateStr = request.getParameter("date");
             String timeStr = request.getParameter("time");
             String reason = request.getParameter("reason");
+            String contactName = request.getParameter("contactName");
+            String contactPhone = request.getParameter("contactPhone");
+            String visitType = request.getParameter("visitType");
+            String contactAddress = request.getParameter("contactAddress");
 
-            if (serviceId <= 0 || ValidationUtil.isEmpty(dateStr) || ValidationUtil.isEmpty(timeStr)) {
+            if (serviceIdStrings == null || serviceIdStrings.length == 0 || ValidationUtil.isEmpty(dateStr) || ValidationUtil.isEmpty(timeStr)) {
                 throw new ServletException("Vui lòng chọn thú cưng, dịch vụ, ngày và giờ khám.");
             }
+            
+            if (ValidationUtil.isEmpty(contactName)) {
+                throw new ServletException("Vui lòng nhập tên người liên hệ.");
+            }
+
+            if ("HOME".equals(visitType) && ValidationUtil.isEmpty(contactAddress)) {
+                throw new ServletException("Vui lòng nhập địa chỉ khi chọn Khám tại nhà.");
+            }
+
+            // Update user contact info if provided
+            userDAO.updateContactInfo(user.getId(), contactName.trim(), contactPhone != null ? contactPhone.trim() : "", contactAddress != null ? contactAddress.trim() : "");
+            user.setFullName(contactName.trim());
+            user.setPhone(contactPhone != null ? contactPhone.trim() : "");
+            user.setAddress(contactAddress != null ? contactAddress.trim() : "");
 
             Timestamp appointmentDate = parseAppointmentDate(dateStr, timeStr);
             validateAppointmentDate(appointmentDate);
 
-            Service service = serviceDAO.getServiceById(serviceId);
-            if (service == null) {
-                throw new ServletException("Dịch vụ không tồn tại hoặc đã ngừng hoạt động.");
-            }
-
             if (appointmentDAO.hasActiveAppointmentAt(appointmentDate)) {
                 throw new ServletException("Khung giờ này đã có lịch hẹn. Vui lòng chọn giờ khác.");
+            }
+
+            List<Integer> selectedServiceIds = new ArrayList<>();
+            for (String sidStr : serviceIdStrings) {
+                int sid = parseInt(sidStr, -1);
+                if (sid > 0) {
+                    selectedServiceIds.add(sid);
+                }
+            }
+
+            if (selectedServiceIds.isEmpty()) {
+                throw new ServletException("Dịch vụ được chọn không hợp lệ.");
             }
 
             Appointment app = new Appointment();
@@ -120,11 +149,13 @@ public class BookingServlet extends HttpServlet {
             app.setPetId(petId);
             app.setAppointmentDate(appointmentDate);
             app.setReason(reason == null ? null : reason.trim());
-            app.setServiceId(serviceId);
-            app.setPriceAtBooking(service.getPrice());
+            app.setSelectedServiceIds(selectedServiceIds);
+            app.setVisitType(visitType != null ? visitType : "CLINIC");
+            app.setAddress(contactAddress != null ? contactAddress.trim() : "");
 
             boolean success = appointmentDAO.addAppointment(app);
             if (success) {
+                request.getSession().setAttribute("lastAppointmentId", app.getId());
                 response.sendRedirect(request.getContextPath() + "/booking/success");
             } else {
                 request.setAttribute("errorMessage", "Đã có lỗi xảy ra khi lưu lịch hẹn. Vui lòng thử lại.");
