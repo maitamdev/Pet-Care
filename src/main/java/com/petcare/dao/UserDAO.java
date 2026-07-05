@@ -15,7 +15,7 @@ import java.util.List;
 public class UserDAO {
 
     public User login(String username, String password) {
-        String sql = "SELECT id, full_name, username, password, phone, email, image_url, specialty, role, status, address "
+        String sql = "SELECT id, full_name, username, password, phone, email, image_url, specialty, role, status "
                    + "FROM users "
                    + "WHERE username = ? AND status = 1";
 
@@ -37,7 +37,6 @@ public class UserDAO {
                     user.setSpecialty(rs.getString("specialty"));
                     user.setRole(rs.getString("role"));
                     user.setStatus(rs.getInt("status"));
-                    user.setAddress(rs.getString("address"));
                     return user;
                 }
             }
