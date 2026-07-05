@@ -49,7 +49,6 @@ public class ServiceServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.setCharacterEncoding("UTF-8");
         String action = request.getServletPath();
 
         if (!CsrfUtil.isValid(request)) {
@@ -75,7 +74,7 @@ public class ServiceServlet extends HttpServlet {
 
     private void listServices(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String keyword = fixGetEncoding(request.getParameter("keyword"));
+        String keyword = request.getParameter("keyword");
         String sort = request.getParameter("sort");
         List<Service> list;
 
@@ -212,11 +211,5 @@ public class ServiceServlet extends HttpServlet {
         int id = Integer.parseInt(request.getParameter("id"));
         serviceDAO.deleteService(id);
         response.sendRedirect(request.getContextPath() + "/admin/services?success=deleted");
-    }
-    private String fixGetEncoding(String value) throws UnsupportedEncodingException {
-        if (value == null) {
-            return null;
-        }
-        return new String(value.getBytes("ISO-8859-1"), "UTF-8");
     }
 }

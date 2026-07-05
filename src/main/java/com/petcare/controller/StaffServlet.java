@@ -50,7 +50,6 @@ public class StaffServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
-        request.setCharacterEncoding("UTF-8");
         if (!isAdmin(request)) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;

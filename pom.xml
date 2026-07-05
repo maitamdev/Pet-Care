@@ -90,6 +90,7 @@
                 <configuration>
                     <port>8080</port>
                     <path>/PetCareClinic</path>
+                    <uriEncoding>UTF-8</uriEncoding>
                 </configuration>
             </plugin>
         </plugins>

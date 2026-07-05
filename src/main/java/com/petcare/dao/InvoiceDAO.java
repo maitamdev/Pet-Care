@@ -198,6 +198,68 @@ public class InvoiceDAO {
                 "i.created_at, a.customer_id, a.appointment_date, u.full_name, p.name ";
     }
 
+    // Tìm kiếm và lấy danh sách hóa đơn phân trang
+    public List<Invoice> searchInvoicesPaginated(String keyword, String statusFilter, int offset, int limit) {
+        List<Invoice> invoices = new ArrayList<>();
+        String sql = baseSelectSql() +
+                "HAVING (? = '' OR CAST(i.id AS CHAR) LIKE ? OR customer_name LIKE ?) " +
+                "AND (? = '' OR i.status = ?) " +
+                "ORDER BY i.created_at DESC " +
+                "LIMIT ? OFFSET ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            String searchText = keyword == null ? "" : keyword.trim();
+            String searchPattern = "%" + searchText + "%";
+            String statusText = statusFilter == null ? "" : statusFilter.trim();
+            ps.setString(1, searchText);
+            ps.setString(2, searchPattern);
+            ps.setString(3, searchPattern);
+            ps.setString(4, statusText);
+            ps.setString(5, statusText);
+            ps.setInt(6, limit);
+            ps.setInt(7, offset);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    invoices.add(mapInvoice(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return invoices;
+    }
+
+    // Đếm số lượng hóa đơn theo từ khóa tìm kiếm (dùng subquery để bọc lại câu SELECT GROUP BY bên dưới)
+    public int countSearchInvoices(String keyword, String statusFilter) {
+        String sql = "SELECT COUNT(*) FROM (" + baseSelectSql() +
+                "HAVING (? = '' OR CAST(i.id AS CHAR) LIKE ? OR customer_name LIKE ?) " +
+                "AND (? = '' OR i.status = ?)" +
+                ") AS temp";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            String searchText = keyword == null ? "" : keyword.trim();
+            String searchPattern = "%" + searchText + "%";
+            String statusText = statusFilter == null ? "" : statusFilter.trim();
+            ps.setString(1, searchText);
+            ps.setString(2, searchPattern);
+            ps.setString(3, searchPattern);
+            ps.setString(4, statusText);
+            ps.setString(5, statusText);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
     private Invoice mapInvoice(ResultSet rs) throws SQLException {
         Invoice invoice = new Invoice();
         invoice.setId(rs.getInt("id"));

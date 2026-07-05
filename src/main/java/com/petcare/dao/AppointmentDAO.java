@@ -354,6 +354,68 @@ public class AppointmentDAO {
         return null;
     }
 
+    // Lấy danh sách lịch hẹn khám phân trang dùng LIMIT và OFFSET trong SQL
+    public List<Appointment> getAppointmentsPaginated(int offset, int limit) {
+        List<Appointment> list = new ArrayList<>();
+        String sql = "SELECT a.*, p.name as pet_name, u.full_name as customer_name, staff.full_name as staff_name, " +
+                     "GROUP_CONCAT(s.name SEPARATOR ', ') as service_name, SUM(ad.price_at_booking) as price_at_booking " +
+                     "FROM appointments a " +
+                     "JOIN pets p ON a.pet_id = p.id " +
+                     "JOIN users u ON a.customer_id = u.id " +
+                     "LEFT JOIN users staff ON a.staff_id = staff.id " +
+                     "LEFT JOIN appointment_details ad ON a.id = ad.appointment_id " +
+                     "LEFT JOIN services s ON ad.service_id = s.id " +
+                     "GROUP BY a.id " +
+                     "ORDER BY a.appointment_date DESC " +
+                     "LIMIT ? OFFSET ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, limit);
+            ps.setInt(2, offset);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Appointment app = new Appointment();
+                    app.setId(rs.getInt("id"));
+                    app.setCustomerId(rs.getInt("customer_id"));
+                    app.setPetId(rs.getInt("pet_id"));
+                    app.setStaffId(rs.getInt("staff_id"));
+                    if (rs.wasNull()) app.setStaffId(null);
+                    app.setAppointmentDate(rs.getTimestamp("appointment_date"));
+                    app.setStatus(rs.getString("status"));
+                    app.setReason(rs.getString("reason"));
+                    app.setDiagnosis(rs.getString("diagnosis"));
+                    app.setCreatedAt(rs.getTimestamp("created_at"));
+                    app.setCustomerName(rs.getString("customer_name"));
+                    app.setStaffName(rs.getString("staff_name"));
+                    app.setPetName(rs.getString("pet_name"));
+                    app.setServiceName(rs.getString("service_name"));
+                    app.setPriceAtBooking(rs.getBigDecimal("price_at_booking"));
+                    app.setVisitType(rs.getString("visit_type"));
+                    app.setAddress(rs.getString("address"));
+                    list.add(app);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    // Đếm tổng số lượng lịch hẹn để tính tổng số trang phân trang
+    public int getAppointmentsCount() {
+        String sql = "SELECT COUNT(*) FROM appointments";
+        try (Connection conn = DBConnection.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
     private boolean isAllowedStatus(String status) {
         return PENDING.equals(status) || CONFIRMED.equals(status) || COMPLETED.equals(status) || CANCELLED.equals(status);
     }

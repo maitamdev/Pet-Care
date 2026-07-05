@@ -1,4 +1,10 @@
-﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
@@ -11,6 +17,53 @@
     <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/assets/images/petcare_logo_icon.png">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/dashboard.css">
     <style>
+        .pagination-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #e2e8f0;
+        }
+        .pagination-info {
+            font-size: 14px;
+            color: #64748b;
+        }
+        .pagination-links {
+            display: flex;
+            gap: 6px;
+        }
+        .pagination-links a, .pagination-links span {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 32px;
+            height: 32px;
+            padding: 0 6px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            color: #334155;
+            background: #fff;
+            transition: all 0.2s;
+        }
+        .pagination-links a:hover {
+            border-color: #4f46e5;
+            color: #4f46e5;
+        }
+        .pagination-links .active {
+            background-color: #4f46e5;
+            border-color: #4f46e5;
+            color: #fff;
+        }
+        .pagination-links .disabled {
+            background-color: #f8fafc;
+            border-color: #e2e8f0;
+            color: #94a3b8;
+            cursor: not-allowed;
+        }
         .badge.status-unpaid {
             background: #fff3cd;
             color: #856404;
@@ -396,6 +449,44 @@
                         </tbody>
                     </table>
                 </div>
+
+                <c:if test="${totalPages > 1}">
+                    <div class="pagination-container">
+                        <div class="pagination-info">
+                            Hiển thị trang <strong>${currentPage}</strong> trên tổng số <strong>${totalPages}</strong> (Có ${totalCount} hóa đơn)
+                        </div>
+                        <div class="pagination-links">
+                            <c:choose>
+                                <c:when test="${currentPage > 1}">
+                                    <a href="${pageContext.request.contextPath}/admin/invoices?page=${currentPage - 1}&keyword=<c:out value='${keyword}'/>&status=<c:out value='${status}'/>" title="Trang trước"><i class="bi bi-chevron-left"></i></a>
+                                </c:when>
+                                <c:otherwise>
+                                    <span class="disabled"><i class="bi bi-chevron-left"></i></span>
+                                </c:otherwise>
+                            </c:choose>
+
+                            <c:forEach var="p" begin="1" end="${totalPages}">
+                                <c:choose>
+                                    <c:when test="${p == currentPage}">
+                                        <span class="active">${p}</span>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <a href="${pageContext.request.contextPath}/admin/invoices?page=${p}&keyword=<c:out value='${keyword}'/>&status=<c:out value='${status}'/>">${p}</a>
+                                    </c:otherwise>
+                                </c:choose>
+                            </c:forEach>
+
+                            <c:choose>
+                                <c:when test="${currentPage < totalPages}">
+                                    <a href="${pageContext.request.contextPath}/admin/invoices?page=${currentPage + 1}&keyword=<c:out value='${keyword}'/>&status=<c:out value='${status}'/>" title="Trang sau"><i class="bi bi-chevron-right"></i></a>
+                                </c:when>
+                                <c:otherwise>
+                                    <span class="disabled"><i class="bi bi-chevron-right"></i></span>
+                                </c:otherwise>
+                            </c:choose>
+                        </div>
+                    </div>
+                </c:if>
             </div>
         </div>
     </main>

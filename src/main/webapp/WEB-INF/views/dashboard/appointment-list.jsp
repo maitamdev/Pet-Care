@@ -40,6 +40,53 @@
             color: #721c24;
             border: 1px solid #f5c6cb;
         }
+        .pagination-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #e2e8f0;
+        }
+        .pagination-info {
+            font-size: 14px;
+            color: #64748b;
+        }
+        .pagination-links {
+            display: flex;
+            gap: 6px;
+        }
+        .pagination-links a, .pagination-links span {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 32px;
+            height: 32px;
+            padding: 0 6px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            color: #334155;
+            background: #fff;
+            transition: all 0.2s;
+        }
+        .pagination-links a:hover {
+            border-color: #4f46e5;
+            color: #4f46e5;
+        }
+        .pagination-links .active {
+            background-color: #4f46e5;
+            border-color: #4f46e5;
+            color: #fff;
+        }
+        .pagination-links .disabled {
+            background-color: #f8fafc;
+            border-color: #e2e8f0;
+            color: #94a3b8;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body class="dashboard-body">
@@ -80,6 +127,7 @@
                         <h3 class="card-title">Danh sách lịch hẹn</h3>
                         <p class="card-subtitle">Cập nhật trạng thái khám của thú cưng khách hàng.</p>
                     </div>
+                    <a class="btn btn-primary" href="${pageContext.request.contextPath}/admin/appointments/new"><i class="bi bi-plus-circle"></i> Đặt lịch hẹn mới</a>
                 </div>
 
                 <div class="table-responsive">
@@ -198,6 +246,44 @@
                         </tbody>
                     </table>
                 </div>
+                
+                <c:if test="${totalPages > 1}">
+                    <div class="pagination-container">
+                        <div class="pagination-info">
+                            Hiển thị trang <strong>${currentPage}</strong> trên tổng số <strong>${totalPages}</strong> (Có ${totalCount} lịch hẹn)
+                        </div>
+                        <div class="pagination-links">
+                            <c:choose>
+                                <c:when test="${currentPage > 1}">
+                                    <a href="${pageContext.request.contextPath}/admin/appointments?page=${currentPage - 1}" title="Trang trước"><i class="bi bi-chevron-left"></i></a>
+                                </c:when>
+                                <c:otherwise>
+                                    <span class="disabled"><i class="bi bi-chevron-left"></i></span>
+                                </c:otherwise>
+                            </c:choose>
+
+                            <c:forEach var="p" begin="1" end="${totalPages}">
+                                <c:choose>
+                                    <c:when test="${p == currentPage}">
+                                        <span class="active">${p}</span>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <a href="${pageContext.request.contextPath}/admin/appointments?page=${p}">${p}</a>
+                                    </c:otherwise>
+                                </c:choose>
+                            </c:forEach>
+
+                            <c:choose>
+                                <c:when test="${currentPage < totalPages}">
+                                    <a href="${pageContext.request.contextPath}/admin/appointments?page=${currentPage + 1}" title="Trang sau"><i class="bi bi-chevron-right"></i></a>
+                                </c:when>
+                                <c:otherwise>
+                                    <span class="disabled"><i class="bi bi-chevron-right"></i></span>
+                                </c:otherwise>
+                            </c:choose>
+                        </div>
+                    </div>
+                </c:if>
             </div>
         </div>
     </main>

@@ -241,6 +241,89 @@ public class UserDAO {
         return false;
     }
 
+    // Tìm kiếm tài khoản khách hàng có lọc từ khóa và trạng thái (hoạt động/bị khóa)
+    public List<User> searchCustomers(String keyword, String statusFilter) {
+        List<User> list = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("SELECT * FROM users WHERE role = 'CUSTOMER'");
+        
+        List<Object> params = new ArrayList<>();
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            sql.append(" AND (full_name LIKE ? OR phone LIKE ? OR email LIKE ? OR username LIKE ?)");
+            String pattern = "%" + keyword.trim() + "%";
+            params.add(pattern);
+            params.add(pattern);
+            params.add(pattern);
+            params.add(pattern);
+        }
+        
+        if (statusFilter != null && !statusFilter.trim().isEmpty()) {
+            sql.append(" AND status = ?");
+            params.add(Integer.parseInt(statusFilter));
+        }
+        
+        sql.append(" ORDER BY id DESC");
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    User u = new User();
+                    u.setId(rs.getInt("id"));
+                    u.setFullName(rs.getString("full_name"));
+                    u.setUsername(rs.getString("username"));
+                    u.setPhone(rs.getString("phone"));
+                    u.setEmail(rs.getString("email"));
+                    u.setImageUrl(rs.getString("image_url"));
+                    u.setRole(rs.getString("role"));
+                    u.setStatus(rs.getInt("status"));
+                    
+                    try {
+                        u.setAddress(rs.getString("address"));
+                    } catch (SQLException e) {
+                        // Ignored
+                    }
+                    list.add(u);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    // Admin sửa thông tin cá nhân của khách hàng
+    public boolean updateCustomerByAdmin(User user) {
+        String sql = "UPDATE users SET full_name = ?, phone = ?, email = ? WHERE id = ? AND role = 'CUSTOMER'";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, user.getFullName());
+            ps.setString(2, user.getPhone());
+            ps.setString(3, user.getEmail());
+            ps.setInt(4, user.getId());
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    // Khóa hoặc mở khóa tài khoản khách hàng
+    public boolean updateUserStatus(int id, int status) {
+        String sql = "UPDATE users SET status = ? WHERE id = ? AND role = 'CUSTOMER'";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, status);
+            ps.setInt(2, id);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     private User mapUser(ResultSet rs) throws SQLException {
         User u = new User();
         u.setId(rs.getInt("id"));

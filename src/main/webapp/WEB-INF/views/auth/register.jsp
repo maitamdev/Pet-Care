@@ -33,7 +33,7 @@
                 <div class="alert-error"><c:out value="${error}"/></div>
             </c:if>
 
-            <form action="${pageContext.request.contextPath}/register" method="POST">
+            <form action="${pageContext.request.contextPath}/register" method="POST" onsubmit="return validatePasswords();">
                 <div class="form-group">
                     <label>Họ và Tên *</label>
                     <input type="text" name="fullName" class="form-control" required placeholder="Nguyễn Văn A">
@@ -44,7 +44,11 @@
                 </div>
                 <div class="form-group">
                     <label>Mật khẩu *</label>
-                    <input type="password" name="password" class="form-control" required placeholder="Nhập mật khẩu">
+                    <input type="password" name="password" id="password" class="form-control" required placeholder="Nhập mật khẩu (tối thiểu 8 ký tự)">
+                </div>
+                <div class="form-group">
+                    <label>Xác nhận Mật khẩu *</label>
+                    <input type="password" name="confirmPassword" id="confirmPassword" class="form-control" required placeholder="Nhập lại mật khẩu">
                 </div>
                 <div class="form-group">
                     <label>Số điện thoại</label>
@@ -63,6 +67,25 @@
             </div>
         </div>
     </div>
+
+    <script>
+        // Hàm check mật khẩu gõ lại xem có khớp nhau không trước khi gửi lên server
+        function validatePasswords() {
+            var pass = document.getElementById("password").value;
+            var confirmPass = document.getElementById("confirmPassword").value;
+            
+            // Nếu 2 ô ko trùng khớp thì báo lỗi luôn
+            if (pass !== confirmPass) {
+                alert("Mật khẩu và xác nhận mật khẩu không trùng khớp!");
+                return false;
+            }
+            // Check độ dài tối thiểu của pass
+            if (pass.length < 8) {
+                alert("Mật khẩu phải nhập tối thiểu từ 8 kí tự trở lên!");
+                return false;
+            }
+            return true;
+        }
+    </script>
 </body>
 </html>
-

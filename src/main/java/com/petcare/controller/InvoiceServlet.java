@@ -36,20 +36,44 @@ public class InvoiceServlet extends HttpServlet {
             return;
         }
 
+        // Lấy từ khóa tìm kiếm và lọc trạng thái hóa đơn
         String keyword = request.getParameter("keyword");
         String status = request.getParameter("status");
-        List<Invoice> invoices = invoiceDAO.searchInvoices(keyword, status);
+
+        // Bắt đầu tính toán phân trang
+        int page = 1;
+        int limit = 10;
+        try {
+            String pageStr = request.getParameter("page");
+            if (pageStr != null && !pageStr.trim().isEmpty()) {
+                page = Integer.parseInt(pageStr);
+                if (page < 1) page = 1;
+            }
+        } catch (NumberFormatException e) {
+            page = 1;
+        }
+
+        // Tính offset dịch chuyển trong câu lệnh LIMIT và OFFSET
+        int offset = (page - 1) * limit;
+        int totalCount = invoiceDAO.countSearchInvoices(keyword, status);
+        int totalPages = (int) Math.ceil((double) totalCount / limit);
+        if (totalPages < 1) totalPages = 1;
+
+        // Lấy danh sách hóa đơn đã phân trang và set các attribute hiển thị
+        List<Invoice> invoices = invoiceDAO.searchInvoicesPaginated(keyword, status, offset, limit);
         request.setAttribute("invoices", invoices);
         request.setAttribute("listInvoices", invoices);
         request.setAttribute("keyword", keyword);
         request.setAttribute("status", status);
+        request.setAttribute("currentPage", page);
+        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("totalCount", totalCount);
         request.getRequestDispatcher("/WEB-INF/views/dashboard/invoice-list.jsp").forward(request, response);
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
-        request.setCharacterEncoding("UTF-8");
         if (!CsrfUtil.isValid(request)) {
             response.sendRedirect(request.getContextPath() + "/admin/invoices?error=csrf");
             return;

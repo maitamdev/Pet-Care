@@ -33,6 +33,13 @@
         </li>
 
         <li>
+            <a href="${pageContext.request.contextPath}/admin/customers"
+               class="${param.active == 'customers' ? 'active' : ''}">
+                <i class="bi bi-people-fill"></i> Khách hàng
+            </a>
+        </li>
+
+        <li>
             <a href="${pageContext.request.contextPath}/admin/invoices"
                class="${param.active == 'invoices' ? 'active' : ''}">
                 <i class="bi bi-receipt"></i> Hóa đơn
