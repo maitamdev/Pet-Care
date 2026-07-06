@@ -66,19 +66,9 @@ PetCare Clinic là website quản lý phòng khám thú y được phát triển
    source database/petcare_db.sql;
    source database/invoices.sql;
    ```
-   Hoặc sử dụng script tự động (PowerShell):
-   ```powershell
-   .\setup.ps1
-   ```
-   Nhập mật khẩu root MySQL khi được yêu cầu. Script sẽ tự động tạo database, import dữ liệu mẫu và tạo tài khoản kết nối.
 
 3. Chạy project:
-   ```powershell
-   .\run.ps1
-   ```
-   Hoặc chạy thủ công:
-   ```powershell
-   . .\.env.ps1
+   
    mvn tomcat7:run
    ```
 
