@@ -26,7 +26,9 @@
     <div class="auth-container">
         <div class="auth-card">
             <div class="auth-header">
-                <div style="font-size:48px;">🐾</div>
+                <div style="text-align: center; width: 100%; margin-bottom: 10px;">
+                    <img src="${pageContext.request.contextPath}/assets/images/petcare_logo_icon.png" alt="PetCare Clinic" style="height: 64px; width: auto; display: inline-block;">
+                </div>
                 <h2 style="color:#00796b;">Đăng nhập PetCare</h2>
             </div>
             

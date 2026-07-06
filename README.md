@@ -1,141 +1,130 @@
 # PetCare Clinic
 
-PetCare Clinic is a Java Web MVC project for managing a veterinary clinic and online pet appointment booking.
+Hệ thống Quản lý Phòng Khám Thú Y & Đặt Lịch Hẹn Trực Tuyến.
 
-## Tech Stack
+## 1. Thông tin nhóm
+
+| STT | Họ và tên | Vai trò |
+| :---: | :--- | :--- |
+| 1 | Mai Trần Thiện Tâm | Trưởng nhóm |
+| 2 | Nguyễn Hoàng Trung Hiếu | Thành viên |
+| 3 | Châu Thanh Sang | Thành viên |
+| 4 | Nguyễn Thanh Thiên | Thành viên |
+| 5 | La Gia Thành | Thành viên |
+
+- **Giảng viên hướng dẫn:** TS. Lê Duy Tân
+
+## 2. Mô tả đề tài
+
+PetCare Clinic là website quản lý phòng khám thú y được phát triển trên nền tảng Java Web (Servlet/JSP), nhằm hỗ trợ tối ưu các hoạt động vận hành phòng khám và cung cấp cổng đặt lịch hẹn trực tuyến cho khách hàng. Hệ thống phục vụ ba nhóm người dùng: Quản trị viên (Admin), Nhân viên (Staff) và Khách hàng (Customer).
+
+## 3. Công nghệ sử dụng
 
 - Java 17
-- Servlet/JSP/JSTL
-- JDBC
-- MySQL 8
-- Maven
-- Tomcat Maven Plugin
+- Java Servlet API
+- JSP (JavaServer Pages) & JSTL
+- JDBC (Java Database Connectivity)
+- HTML5, CSS3, JavaScript
+- MySQL Server 8
+- Apache Tomcat (Tomcat Maven Plugin)
+- Apache Maven
+- jBCrypt (mã hóa mật khẩu)
+- JUnit 5 (kiểm thử tự động)
 
-## Main Features
+## 4. Các chức năng chính
 
-- Public home page and appointment booking
-- Register, login, logout
-- Roles: `ADMIN`, `STAFF`, `CUSTOMER`
-- Customer profile, password change, pet records, appointments, invoices
-- Admin/staff appointment approval, clinical notes, invoice creation
-- Service, pet, staff, invoice, and report management
-- Image upload for users and pets
-- CSRF protection for mutating forms
-- BCrypt password hashing with legacy SHA-256 compatibility
-- Basic automated tests with JUnit 5
+1. Đăng ký, đăng nhập, đăng xuất và phân quyền (Admin / Staff / Customer).
+2. Trang chủ giới thiệu phòng khám và dịch vụ.
+3. Đặt lịch hẹn khám trực tuyến cho thú cưng.
+4. Quản lý hồ sơ thú cưng (thêm, sửa, xóa, upload ảnh).
+5. Quản lý dịch vụ y tế (thêm, sửa, xóa, tìm kiếm).
+6. Quản lý lịch hẹn (phê duyệt, cập nhật trạng thái, ghi chú bệnh án lâm sàng).
+7. Quản lý hóa đơn thanh toán (tạo, sửa, cập nhật trạng thái).
+8. Quản lý nhân viên & bác sĩ thú y.
+9. Quản lý thông tin khách hàng.
+10. Thống kê và báo cáo doanh thu phòng khám.
+11. Quản lý hồ sơ cá nhân và đổi mật khẩu.
 
-## Requirements
+## 5. Hướng dẫn cài đặt
+
+### Yêu cầu hệ thống
 
 - JDK 17
 - Maven 3.8+
 - MySQL Server 8+
 
-## First-Time Setup
+### Các bước cài đặt
 
-Open PowerShell in the project root:
+1. Clone project từ GitHub:
+   ```bash
+   git clone https://github.com/maitamdev/Pet-Care.git
+   cd Pet-Care
+   ```
 
-```powershell
-cd D:\Pet-Care
-.\setup.ps1
+2. Import database vào MySQL:
+   ```sql
+   source database/petcare_db.sql;
+   source database/invoices.sql;
+   ```
+   Hoặc sử dụng script tự động (PowerShell):
+   ```powershell
+   .\setup.ps1
+   ```
+   Nhập mật khẩu root MySQL khi được yêu cầu. Script sẽ tự động tạo database, import dữ liệu mẫu và tạo tài khoản kết nối.
+
+3. Chạy project:
+   ```powershell
+   .\run.ps1
+   ```
+   Hoặc chạy thủ công:
+   ```powershell
+   . .\.env.ps1
+   mvn tomcat7:run
+   ```
+
+4. Mở trình duyệt truy cập:
+   ```
+   http://localhost:8080/PetCareClinic
+   ```
+
+## 6. Tài khoản demo
+
+| Vai trò | Username | Password |
+| :--- | :--- | :--- |
+| Admin | admin | 123456 |
+
+Tài khoản Customer có thể đăng ký trực tiếp trên giao diện web.
+
+## 7. Cấu trúc thư mục
+
 ```
-
-Enter your MySQL `root` password when prompted.
-
-The script will:
-
-- create/update database `petcare_db`
-- import seed data
-- create/update MySQL user `petcare_app`
-- write local credentials to `.env.ps1`
-
-`.env.ps1` is intentionally ignored by Git.
-
-## Run The App
-
-Recommended:
-
-```powershell
-.\run.ps1
-```
-
-Manual alternative:
-
-```powershell
-. .\.env.ps1
-mvn tomcat7:run
-```
-
-Then open:
-
-```text
-http://localhost:8080/PetCareClinic
-```
-
-## Demo Account
-
-```text
-Username: admin
-Password: 123456
-Role: ADMIN
-```
-
-You can register customer accounts from the web UI.
-
-## Database Migration
-
-If the database already exists and only schema updates are needed:
-
-```powershell
-.\migrate.ps1
-```
-
-This applies the invoice migration without recreating the app user.
-
-## Build And Test
-
-```powershell
-mvn clean package
-```
-
-Expected result:
-
-```text
-BUILD SUCCESS
-Tests run: 6, Failures: 0
-```
-
-## Project Structure
-
-```text
 Pet-Care/
 ├── database/
-│   ├── petcare_db.sql
-│   └── invoices.sql
+│   ├── petcare_db.sql          # Tạo database và dữ liệu mẫu
+│   └── invoices.sql            # Migration bảng hóa đơn
 ├── src/main/java/com/petcare/
-│   ├── config/
-│   ├── controller/
-│   ├── dao/
-│   ├── filter/
-│   ├── model/
-│   └── util/
+│   ├── config/                 # Cấu hình kết nối JDBC
+│   ├── controller/             # Servlet (Controller)
+│   ├── dao/                    # Data Access Object (Model)
+│   ├── filter/                 # Auth, Encoding, Security filters
+│   ├── model/                  # Java Bean (Entity)
+│   └── util/                   # Tiện ích (CSRF, Hash, Upload, ...)
 ├── src/main/webapp/
-│   ├── assets/
-│   ├── WEB-INF/views/
-│   └── index.jsp
-├── src/test/java/
-├── setup.ps1
-├── migrate.ps1
-├── run.ps1
-└── pom.xml
+│   ├── assets/css/             # CSS tự viết
+│   ├── assets/js/              # JavaScript
+│   ├── assets/images/          # Hình ảnh, logo
+│   ├── WEB-INF/views/          # JSP Views (auth, customer, dashboard, public)
+│   └── index.jsp               # Trang mặc định
+├── src/test/java/              # Unit Test (JUnit 5)
+├── report/                     # Báo cáo đồ án
+├── slides/                     # Slides thuyết trình
+├── video/                      # Video thuyết trình & demo
+├── setup.ps1                   # Script cài đặt tự động
+├── run.ps1                     # Script chạy ứng dụng
+├── pom.xml                     # Maven project file
+└── README.md
 ```
 
-## Notes For Other Machines
+## 8. Video thuyết trình và demo
 
-After pulling the code on another computer:
-
-1. Install JDK 17, Maven, and MySQL.
-2. Run `.\setup.ps1`.
-3. Run `.\run.ps1`.
-4. Login with `admin / 123456`.
-
-Do not commit `.env.ps1`, uploaded images, `target/`, or local IDE files.
+> Video thuyết trình và demo sản phẩm: [Xem tại đây](video/)
