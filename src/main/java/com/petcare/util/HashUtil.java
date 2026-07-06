@@ -14,10 +14,18 @@ public class HashUtil {
         if (password == null || storedHash == null) {
             return false;
         }
-        if (storedHash.startsWith("$2a$") || storedHash.startsWith("$2b$") || storedHash.startsWith("$2y$")) {
+        if (isBcryptHash(storedHash)) {
             return BCrypt.checkpw(password, storedHash);
         }
         return sha256(password).equals(storedHash);
+    }
+
+    public static boolean isLegacyHash(String storedHash) {
+        return storedHash != null && !isBcryptHash(storedHash);
+    }
+
+    private static boolean isBcryptHash(String storedHash) {
+        return storedHash.startsWith("$2a$") || storedHash.startsWith("$2b$") || storedHash.startsWith("$2y$");
     }
 
     private static String sha256(String password) {

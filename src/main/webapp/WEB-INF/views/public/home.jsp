@@ -31,9 +31,12 @@
                         <a href="${pageContext.request.contextPath}${sessionScope.user.role == 'CUSTOMER' ? '/my/appointments' : '/dashboard'}" class="nav-link" style="color: var(--accent-green); font-weight: bold;">
                             <i class="bi bi-person-circle"></i> <c:out value="${sessionScope.user.fullName}"/>
                         </a>
-                        <a href="${pageContext.request.contextPath}/logout" class="nav-link" style="color: #c62828; font-weight: bold;">
-                            <i class="bi bi-box-arrow-right"></i> Đăng xuất
-                        </a>
+                        <form action="${pageContext.request.contextPath}/logout" method="POST" style="display:inline;margin:0;">
+                            <input type="hidden" name="csrfToken" value="${csrfToken}">
+                            <button type="submit" class="nav-link" style="color: #c62828; font-weight: bold; background:none; border:none; cursor:pointer;">
+                                <i class="bi bi-box-arrow-right"></i> Đăng xuất
+                            </button>
+                        </form>
                     </c:when>
                     <c:otherwise>
                         <a href="${pageContext.request.contextPath}/login" class="nav-link" style="color: var(--accent-green); font-weight: bold;">

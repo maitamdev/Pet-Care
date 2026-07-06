@@ -36,6 +36,32 @@ public class ServiceDAO {
         return list;
     }
 
+    public boolean areAllServicesActive(List<Integer> serviceIds) {
+        if (serviceIds == null || serviceIds.isEmpty()) {
+            return false;
+        }
+        StringBuilder placeholders = new StringBuilder();
+        for (int i = 0; i < serviceIds.size(); i++) {
+            if (i > 0) {
+                placeholders.append(',');
+            }
+            placeholders.append('?');
+        }
+        String sql = "SELECT COUNT(*) FROM services WHERE status = 1 AND id IN (" + placeholders + ")";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            for (int i = 0; i < serviceIds.size(); i++) {
+                ps.setInt(i + 1, serviceIds.get(i));
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() && rs.getInt(1) == serviceIds.size();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     public Service getServiceById(int id) {
         String sql = "SELECT * FROM services WHERE id = ? AND status = 1";
         try (Connection conn = DBConnection.getConnection();

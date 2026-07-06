@@ -4,13 +4,14 @@ import com.petcare.dao.AppointmentDAO;
 import com.petcare.model.Appointment;
 import com.petcare.model.User;
 import com.petcare.util.CsrfUtil;
+import com.petcare.util.SessionUtil;
+import com.petcare.util.ValidationUtil;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
 
@@ -26,7 +27,10 @@ public class CustomerAppointmentServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        User user = currentUser(request);
+        User user = SessionUtil.requireUser(request, response);
+        if (user == null) {
+            return;
+        }
         List<Appointment> appointments = appointmentDAO.getAppointmentsByCustomerId(user.getId());
         request.setAttribute("appointments", appointments);
         CsrfUtil.getToken(request);
@@ -36,26 +40,16 @@ public class CustomerAppointmentServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
-        User user = currentUser(request);
+        User user = SessionUtil.requireUser(request, response);
+        if (user == null) {
+            return;
+        }
         if (!CsrfUtil.isValid(request)) {
             response.sendRedirect(request.getContextPath() + "/my/appointments?error=csrf");
             return;
         }
-        int id = parseInt(request.getParameter("id"));
-        appointmentDAO.cancelByCustomer(id, user.getId());
-        response.sendRedirect(request.getContextPath() + "/my/appointments?success=cancelled");
-    }
-
-    private User currentUser(HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        return (User) session.getAttribute("user");
-    }
-
-    private int parseInt(String value) {
-        try {
-            return Integer.parseInt(value);
-        } catch (Exception e) {
-            return -1;
-        }
+        int id = ValidationUtil.parseIntOrDefault(request.getParameter("id"), -1);
+        boolean success = appointmentDAO.cancelByCustomer(id, user.getId());
+        response.sendRedirect(request.getContextPath() + "/my/appointments?" + (success ? "success=cancelled" : "error=cancel_failed"));
     }
 }

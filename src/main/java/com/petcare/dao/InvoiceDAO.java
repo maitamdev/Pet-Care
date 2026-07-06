@@ -29,11 +29,8 @@ public class InvoiceDAO {
     }
 
     public boolean createInvoiceFromAppointment(int appointmentId) {
-        if (existsByAppointmentId(appointmentId)) {
-            return true;
-        }
-
-        String sql = "INSERT INTO invoices " +
+        String lockSql = "SELECT id FROM invoices WHERE appointment_id = ? LIMIT 1 FOR UPDATE";
+        String insertSql = "INSERT INTO invoices " +
                 "(appointment_id, manual_customer_name, manual_pet_name, manual_service_name, total_amount, status) " +
                 "SELECT a.id, u.full_name, p.name, GROUP_CONCAT(s.name SEPARATOR ', '), " +
                 "SUM(ad.price_at_booking), 'UNPAID' " +
@@ -45,14 +42,65 @@ public class InvoiceDAO {
                 "WHERE a.id = ? " +
                 "GROUP BY a.id, u.full_name, p.name";
 
+        Connection conn = null;
+        try {
+            conn = DBConnection.getConnection();
+            conn.setAutoCommit(false);
+
+            try (PreparedStatement lockPs = conn.prepareStatement(lockSql)) {
+                lockPs.setInt(1, appointmentId);
+                try (ResultSet rs = lockPs.executeQuery()) {
+                    if (rs.next()) {
+                        conn.commit();
+                        return true;
+                    }
+                }
+            }
+
+            try (PreparedStatement insertPs = conn.prepareStatement(insertSql)) {
+                insertPs.setInt(1, appointmentId);
+                boolean created = insertPs.executeUpdate() > 0;
+                conn.commit();
+                return created;
+            }
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException rollbackEx) {
+                    rollbackEx.printStackTrace();
+                }
+            }
+            if (e.getErrorCode() == 1062) {
+                return true;
+            }
+            e.printStackTrace();
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (SQLException closeEx) {
+                    closeEx.printStackTrace();
+                }
+            }
+        }
+        return false;
+    }
+
+    public long getMonthlyPaidRevenue() {
+        String sql = "SELECT COALESCE(SUM(total_amount), 0) FROM invoices " +
+                "WHERE status = 'PAID' AND MONTH(created_at) = MONTH(CURDATE()) AND YEAR(created_at) = YEAR(CURDATE())";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, appointmentId);
-            return ps.executeUpdate() > 0;
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getLong(1);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return false;
+        return 0;
     }
 
     public boolean createForCompletedAppointment(int appointmentId) {
@@ -263,7 +311,8 @@ public class InvoiceDAO {
     private Invoice mapInvoice(ResultSet rs) throws SQLException {
         Invoice invoice = new Invoice();
         invoice.setId(rs.getInt("id"));
-        invoice.setAppointmentId(rs.getInt("appointment_id"));
+        int appointmentId = rs.getInt("appointment_id");
+        invoice.setAppointmentId(rs.wasNull() ? 0 : appointmentId);
         invoice.setTotalAmount(rs.getBigDecimal("total_amount"));
         invoice.setPaymentMethod(rs.getString("payment_method"));
         invoice.setStatus(rs.getString("status"));

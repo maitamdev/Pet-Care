@@ -97,8 +97,12 @@ public class PetServlet extends HttpServlet {
 
     private void showEditForm(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        int id = Integer.parseInt(request.getParameter("id"));
+        int id = ValidationUtil.parseIntOrDefault(request.getParameter("id"), -1);
         Pet existingPet = petDAO.getPetById(id);
+        if (existingPet == null) {
+            response.sendRedirect(request.getContextPath() + "/admin/pets?error=notfound");
+            return;
+        }
         request.setAttribute("pet", existingPet);
         
         List<User> customers = userDAO.getAllCustomers();
@@ -110,88 +114,100 @@ public class PetServlet extends HttpServlet {
 
     private void insertPet(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
-        int customerId = Integer.parseInt(request.getParameter("customerId"));
+        int customerId = ValidationUtil.parseIntOrDefault(request.getParameter("customerId"), -1);
+        if (customerId <= 0) {
+            response.sendRedirect(request.getContextPath() + "/admin/pets/new?error=invalid");
+            return;
+        }
         String name = request.getParameter("name");
         String species = request.getParameter("species");
-        String breed = request.getParameter("breed");
 
         if (ValidationUtil.isEmpty(name) || ValidationUtil.isEmpty(species)) {
             response.sendRedirect(request.getContextPath() + "/admin/pets/new?error=invalid");
             return;
         }
         
-        String ageStr = request.getParameter("age");
-        Integer age = (ageStr != null && !ageStr.trim().isEmpty()) ? Integer.parseInt(ageStr) : null;
-        
-        String weightStr = request.getParameter("weight");
-        BigDecimal weight = (weightStr != null && !weightStr.trim().isEmpty()) ? new BigDecimal(weightStr) : null;
-        
-        String gender = request.getParameter("gender");
-        String notes = request.getParameter("notes");
-
-        Pet p = new Pet();
-        p.setCustomerId(customerId);
-        p.setName(name);
-        p.setSpecies(species);
-        p.setBreed(breed);
-        p.setAge(age);
-        p.setWeight(weight);
-        p.setGender(gender);
-        p.setImageUrl(FileUploadUtil.saveImage(request.getPart("image"), getUploadRoot()));
-        p.setNotes(notes);
-
+        Pet p = buildPetFromRequest(request, customerId, -1);
+        if (p == null) {
+            response.sendRedirect(request.getContextPath() + "/admin/pets/new?error=invalid");
+            return;
+        }
         petDAO.addPet(p);
         response.sendRedirect(request.getContextPath() + "/admin/pets");
     }
 
     private void updatePet(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
-        int id = Integer.parseInt(request.getParameter("id"));
-        int customerId = Integer.parseInt(request.getParameter("customerId"));
+        int id = ValidationUtil.parseIntOrDefault(request.getParameter("id"), -1);
+        int customerId = ValidationUtil.parseIntOrDefault(request.getParameter("customerId"), -1);
+        if (id <= 0 || customerId <= 0) {
+            response.sendRedirect(request.getContextPath() + "/admin/pets?error=invalid");
+            return;
+        }
         String name = request.getParameter("name");
         String species = request.getParameter("species");
-        String breed = request.getParameter("breed");
 
         if (ValidationUtil.isEmpty(name) || ValidationUtil.isEmpty(species)) {
             response.sendRedirect(request.getContextPath() + "/admin/pets/edit?id=" + id + "&error=invalid");
             return;
         }
         
-        String ageStr = request.getParameter("age");
-        Integer age = (ageStr != null && !ageStr.trim().isEmpty()) ? Integer.parseInt(ageStr) : null;
-        
-        String weightStr = request.getParameter("weight");
-        BigDecimal weight = (weightStr != null && !weightStr.trim().isEmpty()) ? new BigDecimal(weightStr) : null;
-        
-        String gender = request.getParameter("gender");
-        String notes = request.getParameter("notes");
-
-        Pet p = new Pet();
-        p.setId(id);
-        p.setCustomerId(customerId);
-        p.setName(name);
-        p.setSpecies(species);
-        p.setBreed(breed);
-        p.setAge(age);
-        p.setWeight(weight);
-        p.setGender(gender);
-        String imageUrl = FileUploadUtil.saveImage(request.getPart("image"), getUploadRoot());
-        if (imageUrl == null) {
-            Pet existing = petDAO.getPetById(id);
-            imageUrl = existing == null ? null : existing.getImageUrl();
+        Pet p = buildPetFromRequest(request, customerId, id);
+        if (p == null) {
+            response.sendRedirect(request.getContextPath() + "/admin/pets/edit?id=" + id + "&error=invalid");
+            return;
         }
-        p.setImageUrl(imageUrl);
-        p.setNotes(notes);
-
         petDAO.updatePet(p);
         response.sendRedirect(request.getContextPath() + "/admin/pets");
     }
 
     private void deletePet(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
-        int id = Integer.parseInt(request.getParameter("id"));
+        int id = ValidationUtil.parseIntOrDefault(request.getParameter("id"), -1);
         petDAO.deletePet(id);
         response.sendRedirect(request.getContextPath() + "/admin/pets");
+    }
+
+    private Pet buildPetFromRequest(HttpServletRequest request, int customerId, int id)
+            throws IOException, ServletException {
+        String name = request.getParameter("name");
+        String species = request.getParameter("species");
+        String breed = request.getParameter("breed");
+        if (ValidationUtil.isEmpty(name) || ValidationUtil.isEmpty(species)) {
+            return null;
+        }
+
+        Pet p = new Pet();
+        if (id > 0) {
+            p.setId(id);
+        }
+        p.setCustomerId(customerId);
+        p.setName(name);
+        p.setSpecies(species);
+        p.setBreed(breed);
+
+        try {
+            String ageStr = request.getParameter("age");
+            if (ageStr != null && !ageStr.trim().isEmpty()) {
+                p.setAge(ValidationUtil.parseIntOrDefault(ageStr, -1));
+            }
+            String weightStr = request.getParameter("weight");
+            if (weightStr != null && !weightStr.trim().isEmpty()) {
+                p.setWeight(new BigDecimal(weightStr));
+            }
+        } catch (NumberFormatException e) {
+            return null;
+        }
+
+        p.setGender(request.getParameter("gender"));
+        String imageUrl = FileUploadUtil.saveImage(request.getPart("image"), getUploadRoot());
+        if (imageUrl == null && id > 0) {
+            Pet existing = petDAO.getPetById(id);
+            imageUrl = existing == null ? null : existing.getImageUrl();
+        }
+        p.setImageUrl(imageUrl);
+        p.setNotes(request.getParameter("notes"));
+        return p;
     }
 
     private String getUploadRoot() {

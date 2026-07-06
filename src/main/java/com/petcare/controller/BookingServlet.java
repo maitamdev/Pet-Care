@@ -55,6 +55,7 @@ public class BookingServlet extends HttpServlet {
         String path = request.getServletPath();
 
         if ("/booking/success".equals(path)) {
+            CsrfUtil.getToken(request);
             request.getRequestDispatcher("/WEB-INF/views/public/booking-success.jsp").forward(request, response);
             return;
         }
@@ -141,6 +142,9 @@ public class BookingServlet extends HttpServlet {
             if (selectedServiceIds.isEmpty()) {
                 throw new ServletException("Dịch vụ được chọn không hợp lệ.");
             }
+            if (!serviceDAO.areAllServicesActive(selectedServiceIds)) {
+                throw new ServletException("Một hoặc nhiều dịch vụ không tồn tại hoặc đã ngừng hoạt động.");
+            }
 
             Appointment app = new Appointment();
             app.setCustomerId(user.getId());
@@ -210,6 +214,9 @@ public class BookingServlet extends HttpServlet {
     }
 
     private Timestamp parseAppointmentDate(String dateStr, String timeStr) throws Exception {
+        if (ValidationUtil.isEmpty(timeStr)) {
+            throw new ServletException("Giờ khám không hợp lệ.");
+        }
         if (timeStr.length() == 5) {
             timeStr += ":00";
         }

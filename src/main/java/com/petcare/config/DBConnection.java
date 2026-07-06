@@ -19,11 +19,7 @@ public class DBConnection {
 
     private static final String URL = setting("PETCARE_DB_URL", DEFAULT_URL);
     private static final String USER = setting("PETCARE_DB_USER", "petcare_app");
-    private static final String PASSWORD = setting("PETCARE_DB_PASSWORD", "123456");
-
-    static {
-        System.out.println("[PetCare] Database user: " + USER + " | env file: " + findEnvFile().getAbsolutePath());
-    }
+    private static final String PASSWORD = setting("PETCARE_DB_PASSWORD", null);
 
     private static String setting(String name, String defaultValue) {
         String value = System.getenv(name);
@@ -95,6 +91,9 @@ public class DBConnection {
     }
 
     public static Connection getConnection() throws SQLException {
+        if (PASSWORD == null || PASSWORD.trim().isEmpty()) {
+            throw new SQLException("Database password is not configured. Run setup.ps1 or set PETCARE_DB_PASSWORD.");
+        }
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
         } catch (ClassNotFoundException e) {

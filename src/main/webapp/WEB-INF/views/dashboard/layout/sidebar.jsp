@@ -69,9 +69,12 @@
         </c:if>
 
         <li>
-            <a class="logout-link" href="${pageContext.request.contextPath}/logout">
-                <i class="bi bi-box-arrow-right"></i> Đăng xuất
-            </a>
+            <form action="${pageContext.request.contextPath}/logout" method="POST" style="margin:0;">
+                <input type="hidden" name="csrfToken" value="${csrfToken}">
+                <button type="submit" class="logout-link" style="background:none;border:none;width:100%;text-align:left;cursor:pointer;">
+                    <i class="bi bi-box-arrow-right"></i> Đăng xuất
+                </button>
+            </form>
         </li>
     </ul>
 </aside>

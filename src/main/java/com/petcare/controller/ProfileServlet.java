@@ -5,6 +5,7 @@ import com.petcare.model.User;
 import com.petcare.util.CsrfUtil;
 import com.petcare.util.FileUploadUtil;
 import com.petcare.util.HashUtil;
+import com.petcare.util.SessionUtil;
 import com.petcare.util.ValidationUtil;
 
 import javax.servlet.ServletException;
@@ -13,7 +14,6 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 @WebServlet("/my/profile")
@@ -29,6 +29,9 @@ public class ProfileServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        if (SessionUtil.requireUser(request, response) == null) {
+            return;
+        }
         CsrfUtil.getToken(request);
         request.getRequestDispatcher("/WEB-INF/views/customer/profile.jsp").forward(request, response);
     }
@@ -36,12 +39,15 @@ public class ProfileServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
+        User current = SessionUtil.requireUser(request, response);
+        if (current == null) {
+            return;
+        }
         if (!CsrfUtil.isValid(request)) {
             response.sendRedirect(request.getContextPath() + "/my/profile?error=csrf");
             return;
         }
 
-        User current = currentUser(request);
         String action = request.getParameter("action");
         if ("change-password".equals(action)) {
             changePassword(request, response, current);
@@ -59,6 +65,11 @@ public class ProfileServlet extends HttpServlet {
             return;
         }
 
+        if (!ValidationUtil.isEmpty(email) && userDAO.checkEmailExist(email, current.getId())) {
+            response.sendRedirect(request.getContextPath() + "/my/profile?error=email_exists");
+            return;
+        }
+
         current.setFullName(fullName.trim());
         current.setPhone(phone == null ? null : phone.trim());
         current.setEmail(email == null ? null : email.trim());
@@ -66,9 +77,12 @@ public class ProfileServlet extends HttpServlet {
         if (imageUrl != null) {
             current.setImageUrl(imageUrl);
         }
-        userDAO.updateProfile(current);
-        request.getSession().setAttribute("user", current);
-        response.sendRedirect(request.getContextPath() + "/my/profile?success=updated");
+        if (userDAO.updateProfile(current)) {
+            SessionUtil.updateUser(request, current);
+            response.sendRedirect(request.getContextPath() + "/my/profile?success=updated");
+        } else {
+            response.sendRedirect(request.getContextPath() + "/my/profile?error=update_failed");
+        }
     }
 
     private void changePassword(HttpServletRequest request, HttpServletResponse response, User current)
@@ -76,27 +90,20 @@ public class ProfileServlet extends HttpServlet {
         String currentPassword = request.getParameter("currentPassword");
         String newPassword = request.getParameter("newPassword");
         String confirmPassword = request.getParameter("confirmPassword");
+        String storedHash = userDAO.getPasswordHash(current.getId());
 
         if (ValidationUtil.isEmpty(currentPassword) || ValidationUtil.isEmpty(newPassword) ||
-                newPassword.length() < 6 || !newPassword.equals(confirmPassword) ||
-                !HashUtil.verifyPassword(currentPassword, current.getPassword())) {
+                !ValidationUtil.isValidPassword(newPassword) || !newPassword.equals(confirmPassword) ||
+                !HashUtil.verifyPassword(currentPassword, storedHash)) {
             response.sendRedirect(request.getContextPath() + "/my/profile?error=password");
             return;
         }
 
-        String hashedPassword = HashUtil.hashPassword(newPassword);
-        if (userDAO.updatePassword(current.getId(), hashedPassword)) {
-            current.setPassword(hashedPassword);
-            request.getSession().setAttribute("user", current);
+        if (userDAO.updatePassword(current.getId(), HashUtil.hashPassword(newPassword))) {
             response.sendRedirect(request.getContextPath() + "/my/profile?success=password");
         } else {
             response.sendRedirect(request.getContextPath() + "/my/profile?error=password_update");
         }
-    }
-
-    private User currentUser(HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        return (User) session.getAttribute("user");
     }
 
     private String getUploadRoot() {

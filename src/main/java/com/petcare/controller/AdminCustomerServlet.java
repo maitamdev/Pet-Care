@@ -152,15 +152,18 @@ public class AdminCustomerServlet extends HttpServlet {
             newCustomer.setPhone(phone.trim());
             newCustomer.setEmail(ValidationUtil.isEmpty(email) ? null : email.trim());
             
-            // Nếu không nhập mật khẩu thì lấy mặc định là 123456 cho nhanh
             if (ValidationUtil.isEmpty(password)) {
-                password = "123456";
+                password = ValidationUtil.generateTemporaryPassword();
+            } else if (!ValidationUtil.isValidPassword(password)) {
+                session.setAttribute("errorMessage", "Mật khẩu phải có ít nhất 8 ký tự.");
+                response.sendRedirect(request.getContextPath() + "/admin/customers/new");
+                return;
             }
             newCustomer.setPassword(HashUtil.hashPassword(password));
 
             boolean success = userDAO.registerUser(newCustomer);
             if (success) {
-                session.setAttribute("successMessage", "Thêm khách hàng mới thành công. Mật khẩu mặc định là: " + password);
+                session.setAttribute("successMessage", "Thêm khách hàng mới thành công. Vui lòng cung cấp mật khẩu cho khách hàng qua kênh riêng tư.");
             } else {
                 session.setAttribute("errorMessage", "Không thể tạo tài khoản khách hàng.");
             }

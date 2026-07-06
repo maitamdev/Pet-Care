@@ -15,7 +15,7 @@ import java.util.List;
 public class UserDAO {
 
     public User login(String username, String password) {
-        String sql = "SELECT id, full_name, username, password, phone, email, image_url, specialty, role, status "
+        String sql = "SELECT id, full_name, username, password, phone, email, image_url, specialty, role, status, address "
                    + "FROM users "
                    + "WHERE username = ? AND status = 1";
 
@@ -25,19 +25,14 @@ public class UserDAO {
             ps.setString(1, username);
 
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next() && HashUtil.verifyPassword(password, rs.getString("password"))) {
-                    User user = new User();
-                    user.setId(rs.getInt("id"));
-                    user.setFullName(rs.getString("full_name"));
-                    user.setUsername(rs.getString("username"));
-                    user.setPassword(rs.getString("password"));
-                    user.setPhone(rs.getString("phone"));
-                    user.setEmail(rs.getString("email"));
-                    user.setImageUrl(rs.getString("image_url"));
-                    user.setSpecialty(rs.getString("specialty"));
-                    user.setRole(rs.getString("role"));
-                    user.setStatus(rs.getInt("status"));
-                    return user;
+                if (rs.next()) {
+                    String storedHash = rs.getString("password");
+                    if (HashUtil.verifyPassword(password, storedHash)) {
+                        if (HashUtil.isLegacyHash(storedHash)) {
+                            upgradePasswordHash(rs.getInt("id"), HashUtil.hashPassword(password));
+                        }
+                        return mapUserPublic(rs);
+                    }
                 }
             }
 
@@ -45,6 +40,22 @@ public class UserDAO {
             e.printStackTrace();
         }
 
+        return null;
+    }
+
+    public String getPasswordHash(int userId) {
+        String sql = "SELECT password FROM users WHERE id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("password");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return null;
     }
 
@@ -63,13 +74,18 @@ public class UserDAO {
     }
 
     public boolean checkEmailExist(String email) {
+        return checkEmailExist(email, 0);
+    }
+
+    public boolean checkEmailExist(String email, int excludeUserId) {
         if (email == null || email.trim().isEmpty()) {
             return false;
         }
-        String sql = "SELECT id FROM users WHERE email = ?";
+        String sql = "SELECT id FROM users WHERE email = ? AND id <> ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, email.trim());
+            ps.setInt(2, excludeUserId);
             try (ResultSet rs = ps.executeQuery()) {
                 return rs.next();
             }
@@ -104,14 +120,7 @@ public class UserDAO {
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
-                User u = new User();
-                u.setId(rs.getInt("id"));
-                u.setFullName(rs.getString("full_name"));
-                u.setUsername(rs.getString("username"));
-                u.setPhone(rs.getString("phone"));
-                u.setEmail(rs.getString("email"));
-                u.setRole(rs.getString("role"));
-                list.add(u);
+                list.add(mapUserPublic(rs));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -126,7 +135,7 @@ public class UserDAO {
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
-                list.add(mapUser(rs));
+                list.add(mapUserPublic(rs));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -141,7 +150,23 @@ public class UserDAO {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return mapUser(rs);
+                    return mapUserPublic(rs);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public User getStaffById(int id) {
+        String sql = "SELECT * FROM users WHERE id = ? AND role = 'STAFF' AND status = 1";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapUserPublic(rs);
                 }
             }
         } catch (SQLException e) {
@@ -240,7 +265,6 @@ public class UserDAO {
         return false;
     }
 
-    // Tìm kiếm tài khoản khách hàng có lọc từ khóa và trạng thái (hoạt động/bị khóa)
     public List<User> searchCustomers(String keyword, String statusFilter) {
         List<User> list = new ArrayList<>();
         StringBuilder sql = new StringBuilder("SELECT * FROM users WHERE role = 'CUSTOMER'");
@@ -256,8 +280,11 @@ public class UserDAO {
         }
         
         if (statusFilter != null && !statusFilter.trim().isEmpty()) {
-            sql.append(" AND status = ?");
-            params.add(Integer.parseInt(statusFilter));
+            int status = com.petcare.util.ValidationUtil.parseIntOrDefault(statusFilter, -1);
+            if (status == 0 || status == 1) {
+                sql.append(" AND status = ?");
+                params.add(status);
+            }
         }
         
         sql.append(" ORDER BY id DESC");
@@ -269,22 +296,7 @@ public class UserDAO {
             }
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    User u = new User();
-                    u.setId(rs.getInt("id"));
-                    u.setFullName(rs.getString("full_name"));
-                    u.setUsername(rs.getString("username"));
-                    u.setPhone(rs.getString("phone"));
-                    u.setEmail(rs.getString("email"));
-                    u.setImageUrl(rs.getString("image_url"));
-                    u.setRole(rs.getString("role"));
-                    u.setStatus(rs.getInt("status"));
-                    
-                    try {
-                        u.setAddress(rs.getString("address"));
-                    } catch (SQLException e) {
-                        // Ignored
-                    }
-                    list.add(u);
+                    list.add(mapUserPublic(rs));
                 }
             }
         } catch (SQLException e) {
@@ -293,7 +305,6 @@ public class UserDAO {
         return list;
     }
 
-    // Admin sửa thông tin cá nhân của khách hàng
     public boolean updateCustomerByAdmin(User user) {
         String sql = "UPDATE users SET full_name = ?, phone = ?, email = ? WHERE id = ? AND role = 'CUSTOMER'";
         try (Connection conn = DBConnection.getConnection();
@@ -309,7 +320,6 @@ public class UserDAO {
         return false;
     }
 
-    // Khóa hoặc mở khóa tài khoản khách hàng
     public boolean updateUserStatus(int id, int status) {
         String sql = "UPDATE users SET status = ? WHERE id = ? AND role = 'CUSTOMER'";
         try (Connection conn = DBConnection.getConnection();
@@ -323,26 +333,25 @@ public class UserDAO {
         return false;
     }
 
-    private User mapUser(ResultSet rs) throws SQLException {
-        User u = new User();
-        u.setId(rs.getInt("id"));
-        u.setFullName(rs.getString("full_name"));
-        u.setUsername(rs.getString("username"));
-        u.setPassword(rs.getString("password"));
-        u.setPhone(rs.getString("phone"));
-        u.setEmail(rs.getString("email"));
-        u.setImageUrl(rs.getString("image_url"));
-        u.setSpecialty(rs.getString("specialty"));
-        u.setRole(rs.getString("role"));
-        u.setStatus(rs.getInt("status"));
-        
-        // Try to get address if column exists in the result set
+    private void upgradePasswordHash(int userId, String hashedPassword) {
+        updatePassword(userId, hashedPassword);
+    }
+
+    private User mapUserPublic(ResultSet rs) throws SQLException {
+        User user = new User();
+        user.setId(rs.getInt("id"));
+        user.setFullName(rs.getString("full_name"));
+        user.setUsername(rs.getString("username"));
+        user.setPhone(rs.getString("phone"));
+        user.setEmail(rs.getString("email"));
+        user.setImageUrl(rs.getString("image_url"));
+        user.setSpecialty(rs.getString("specialty"));
+        user.setRole(rs.getString("role"));
+        user.setStatus(rs.getInt("status"));
         try {
-            u.setAddress(rs.getString("address"));
-        } catch (SQLException e) {
-            // Ignored, column might not be requested in some queries
+            user.setAddress(rs.getString("address"));
+        } catch (SQLException ignored) {
         }
-        
-        return u;
+        return user;
     }
 }

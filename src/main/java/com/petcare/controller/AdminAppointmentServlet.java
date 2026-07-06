@@ -7,8 +7,9 @@ import com.petcare.dao.PetDAO;
 import com.petcare.dao.ServiceDAO;
 import com.petcare.model.Appointment;
 import com.petcare.model.Pet;
-import com.petcare.model.Service;
 import com.petcare.util.CsrfUtil;
+import com.petcare.util.JsonUtil;
+import com.petcare.util.ValidationUtil;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -57,7 +58,7 @@ public class AdminAppointmentServlet extends HttpServlet {
             for (int i = 0; i < pets.size(); i++) {
                 Pet p = pets.get(i);
                 json.append(String.format("{\"id\":%d,\"name\":\"%s\",\"species\":\"%s\"}",
-                        p.getId(), escapeJson(p.getName()), escapeJson(p.getSpecies())));
+                        p.getId(), JsonUtil.escape(p.getName()), JsonUtil.escape(p.getSpecies())));
                 if (i < pets.size() - 1) {
                     json.append(",");
                 }
@@ -216,10 +217,25 @@ public class AdminAppointmentServlet extends HttpServlet {
 
             List<Integer> selectedServiceIds = new ArrayList<>();
             for (String sidStr : serviceIdStrings) {
-                int sid = Integer.parseInt(sidStr);
-                if (sid > 0) {
+                int sid = ValidationUtil.parseIntOrDefault(sidStr, -1);
+                if (sid > 0 && !selectedServiceIds.contains(sid)) {
                     selectedServiceIds.add(sid);
                 }
+            }
+            if (selectedServiceIds.isEmpty()) {
+                session.setAttribute("errorMessage", "Dịch vụ được chọn không hợp lệ.");
+                response.sendRedirect(request.getContextPath() + "/admin/appointments/new");
+                return;
+            }
+            if (!serviceDAO.areAllServicesActive(selectedServiceIds)) {
+                session.setAttribute("errorMessage", "Một hoặc nhiều dịch vụ không tồn tại hoặc đã ngừng hoạt động.");
+                response.sendRedirect(request.getContextPath() + "/admin/appointments/new");
+                return;
+            }
+            if (!petDAO.isPetOwnedByCustomer(petId, customerId)) {
+                session.setAttribute("errorMessage", "Thú cưng không thuộc khách hàng đã chọn.");
+                response.sendRedirect(request.getContextPath() + "/admin/appointments/new");
+                return;
             }
 
             Appointment app = new Appointment();
@@ -234,8 +250,8 @@ public class AdminAppointmentServlet extends HttpServlet {
             boolean success = appointmentDAO.addAppointment(app);
             if (success) {
                 if (assignedStaffId != null) {
-                    appointmentDAO.updateClinicalInfo(app.getId(), assignedStaffId, "");
                     appointmentDAO.updateStatus(app.getId(), "CONFIRMED");
+                    appointmentDAO.updateClinicalInfo(app.getId(), assignedStaffId, "");
                 }
                 session.setAttribute("successMessage", "Tạo lịch hẹn thành công.");
                 response.sendRedirect(request.getContextPath() + "/admin/appointments");
@@ -258,8 +274,4 @@ public class AdminAppointmentServlet extends HttpServlet {
         }
     }
 
-    private String escapeJson(String s) {
-        if (s == null) return "";
-        return s.replace("\\", "\\\\").replace("\"", "\\\"");
-    }
 }

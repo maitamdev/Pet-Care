@@ -25,12 +25,13 @@ public class AuthFilter implements Filter {
 
         String path = request.getRequestURI().substring(request.getContextPath().length());
 
-        if (path.startsWith("/assets/") || path.startsWith("/uploads/")) {
+        if (path.startsWith("/assets/")) {
             chain.doFilter(request, response);
             return;
         }
 
-        boolean isProtected = path.startsWith("/dashboard") || path.startsWith("/admin") || path.startsWith("/staff") || path.startsWith("/my");
+        boolean isProtected = path.startsWith("/dashboard") || path.startsWith("/admin")
+                || path.startsWith("/staff") || path.startsWith("/my") || path.startsWith("/uploads/");
 
         if (isProtected) {
             HttpSession session = request.getSession(false);
@@ -39,18 +40,20 @@ public class AuthFilter implements Filter {
             if (!loggedIn) {
                 response.sendRedirect(request.getContextPath() + "/login");
                 return;
-            } else {
-                User user = (User) session.getAttribute("user");
-                if (("CUSTOMER".equals(user.getRole())) && (path.startsWith("/dashboard") || path.startsWith("/admin") || path.startsWith("/staff"))) {
-                    response.sendRedirect(request.getContextPath() + "/home");
-                    return;
-                } else if (!"CUSTOMER".equals(user.getRole()) && path.startsWith("/my")) {
-                    response.sendRedirect(request.getContextPath() + "/dashboard");
-                    return;
-                } else if ("STAFF".equals(user.getRole()) && isAdminOnly(path)) {
-                    response.sendRedirect(request.getContextPath() + "/dashboard");
-                    return;
-                }
+            }
+
+            User user = (User) session.getAttribute("user");
+            if ("CUSTOMER".equals(user.getRole()) && (path.startsWith("/dashboard") || path.startsWith("/admin") || path.startsWith("/staff"))) {
+                response.sendRedirect(request.getContextPath() + "/home");
+                return;
+            }
+            if (!"CUSTOMER".equals(user.getRole()) && path.startsWith("/my")) {
+                response.sendRedirect(request.getContextPath() + "/dashboard");
+                return;
+            }
+            if ("STAFF".equals(user.getRole()) && isAdminOnly(path)) {
+                response.sendRedirect(request.getContextPath() + "/dashboard");
+                return;
             }
         }
 
@@ -62,8 +65,10 @@ public class AuthFilter implements Filter {
     }
 
     private boolean isAdminOnly(String path) {
-        return path.startsWith("/admin/staff") ||
-                path.startsWith("/admin/services") ||
-                path.startsWith("/admin/reports");
+        return path.startsWith("/admin/staff")
+                || path.startsWith("/admin/services")
+                || path.startsWith("/admin/reports")
+                || path.startsWith("/admin/customers")
+                || path.startsWith("/admin/invoices");
     }
 }

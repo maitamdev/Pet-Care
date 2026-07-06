@@ -9,6 +9,7 @@ import javax.servlet.http.HttpSession;
 import com.petcare.model.User;
 import com.petcare.model.Appointment;
 import com.petcare.dao.AppointmentDAO;
+import com.petcare.dao.InvoiceDAO;
 import com.petcare.dao.PetDAO;
 import java.io.IOException;
 import java.util.List;
@@ -18,11 +19,13 @@ public class DashboardServlet extends HttpServlet {
 
     private AppointmentDAO appointmentDAO;
     private PetDAO petDAO;
+    private InvoiceDAO invoiceDAO;
 
     @Override
     public void init() {
         appointmentDAO = new AppointmentDAO();
         petDAO = new PetDAO();
+        invoiceDAO = new InvoiceDAO();
     }
 
     @Override
@@ -43,10 +46,9 @@ public class DashboardServlet extends HttpServlet {
 
         int totalAppointments = appointmentDAO.countTodayAppointments();
         int pendingApprovals = appointmentDAO.countPendingAppointments();
-        int totalPets = petDAO.getAllPets().size();
-        long monthlyRev = appointmentDAO.getMonthlyRevenue();
+        int totalPets = petDAO.countAllPets();
+        long monthlyRev = invoiceDAO.getMonthlyPaidRevenue();
         
-        // Format monthly revenue with commas
         String totalRevenue = String.format("%,d", monthlyRev);
 
         request.setAttribute("totalAppointments", totalAppointments);
@@ -54,7 +56,6 @@ public class DashboardServlet extends HttpServlet {
         request.setAttribute("totalRevenue", totalRevenue);
         request.setAttribute("pendingApprovals", pendingApprovals);
 
-        // Fetch today's appointments for "Lịch khám nổi bật"
         List<Appointment> todayAppointments = appointmentDAO.getTodayAppointments();
         request.setAttribute("todayAppointments", todayAppointments);
 

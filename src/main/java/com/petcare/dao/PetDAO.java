@@ -9,6 +9,20 @@ import java.util.List;
 
 public class PetDAO {
 
+    public int countAllPets() {
+        String sql = "SELECT COUNT(*) FROM pets";
+        try (Connection conn = DBConnection.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
     public List<Pet> getAllPets() {
         List<Pet> list = new ArrayList<>();
         String sql = "SELECT p.*, u.full_name as customer_name " +

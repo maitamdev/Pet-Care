@@ -5,6 +5,7 @@ import com.petcare.model.Pet;
 import com.petcare.model.User;
 import com.petcare.util.CsrfUtil;
 import com.petcare.util.FileUploadUtil;
+import com.petcare.util.SessionUtil;
 import com.petcare.util.ValidationUtil;
 
 import javax.servlet.ServletException;
@@ -13,7 +14,6 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.math.BigDecimal;
 
@@ -30,7 +30,10 @@ public class CustomerPetServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        User user = currentUser(request);
+        User user = SessionUtil.requireUser(request, response);
+        if (user == null) {
+            return;
+        }
         String path = request.getServletPath();
         CsrfUtil.getToken(request);
 
@@ -39,7 +42,7 @@ public class CustomerPetServlet extends HttpServlet {
             return;
         }
         if ("/my/pets/edit".equals(path)) {
-            int id = parseInt(request.getParameter("id"));
+            int id = ValidationUtil.parseIntOrDefault(request.getParameter("id"), -1);
             if (!petDAO.isPetOwnedByCustomer(id, user.getId())) {
                 response.sendRedirect(request.getContextPath() + "/my/pets?error=notfound");
                 return;
@@ -56,12 +59,15 @@ public class CustomerPetServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
+        User user = SessionUtil.requireUser(request, response);
+        if (user == null) {
+            return;
+        }
         if (!CsrfUtil.isValid(request)) {
             response.sendRedirect(request.getContextPath() + "/my/pets?error=csrf");
             return;
         }
 
-        User user = currentUser(request);
         Pet pet = buildPet(request, user.getId());
         if (pet == null) {
             response.sendRedirect(request.getContextPath() + "/my/pets?error=invalid");
@@ -69,17 +75,21 @@ public class CustomerPetServlet extends HttpServlet {
         }
 
         if ("/my/pets/update".equals(request.getServletPath())) {
-            int id = parseInt(request.getParameter("id"));
+            int id = ValidationUtil.parseIntOrDefault(request.getParameter("id"), -1);
+            if (!petDAO.isPetOwnedByCustomer(id, user.getId())) {
+                response.sendRedirect(request.getContextPath() + "/my/pets?error=notfound");
+                return;
+            }
             pet.setId(id);
             Pet existing = petDAO.getPetById(id);
             if (existing != null && pet.getImageUrl() == null) {
                 pet.setImageUrl(existing.getImageUrl());
             }
-            petDAO.updatePetForCustomer(pet);
-            response.sendRedirect(request.getContextPath() + "/my/pets?success=updated");
+            boolean success = petDAO.updatePetForCustomer(pet);
+            response.sendRedirect(request.getContextPath() + "/my/pets?" + (success ? "success=updated" : "error=update_failed"));
         } else {
-            petDAO.addPet(pet);
-            response.sendRedirect(request.getContextPath() + "/my/pets?success=created");
+            boolean success = petDAO.addPet(pet);
+            response.sendRedirect(request.getContextPath() + "/my/pets?" + (success ? "success=created" : "error=create_failed"));
         }
     }
 
@@ -101,7 +111,7 @@ public class CustomerPetServlet extends HttpServlet {
         String age = request.getParameter("age");
         try {
             if (!ValidationUtil.isEmpty(age)) {
-                int parsedAge = parseInt(age);
+                int parsedAge = ValidationUtil.parseIntOrDefault(age, -1);
                 if (parsedAge < 0 || parsedAge > 80) {
                     return null;
                 }
@@ -119,19 +129,6 @@ public class CustomerPetServlet extends HttpServlet {
             return null;
         }
         return pet;
-    }
-
-    private User currentUser(HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        return (User) session.getAttribute("user");
-    }
-
-    private int parseInt(String value) {
-        try {
-            return Integer.parseInt(value);
-        } catch (Exception e) {
-            return -1;
-        }
     }
 
     private String trim(String value) {

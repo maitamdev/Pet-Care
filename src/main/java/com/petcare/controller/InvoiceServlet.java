@@ -4,13 +4,14 @@ import com.petcare.dao.InvoiceDAO;
 import com.petcare.model.Invoice;
 import com.petcare.model.User;
 import com.petcare.util.CsrfUtil;
+import com.petcare.util.SessionUtil; // Session helper
+import com.petcare.util.ValidationUtil;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
@@ -27,7 +28,10 @@ public class InvoiceServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        User user = currentUser(request);
+        User user = SessionUtil.requireUser(request, response);
+        if (user == null) {
+            return;
+        }
         CsrfUtil.getToken(request);
 
         if (request.getServletPath().startsWith("/my")) {
@@ -36,30 +40,23 @@ public class InvoiceServlet extends HttpServlet {
             return;
         }
 
-        // Lấy từ khóa tìm kiếm và lọc trạng thái hóa đơn
         String keyword = request.getParameter("keyword");
         String status = request.getParameter("status");
 
-        // Bắt đầu tính toán phân trang
         int page = 1;
         int limit = 10;
-        try {
-            String pageStr = request.getParameter("page");
-            if (pageStr != null && !pageStr.trim().isEmpty()) {
-                page = Integer.parseInt(pageStr);
-                if (page < 1) page = 1;
-            }
-        } catch (NumberFormatException e) {
+        page = ValidationUtil.parseIntOrDefault(request.getParameter("page"), 1);
+        if (page < 1) {
             page = 1;
         }
 
-        // Tính offset dịch chuyển trong câu lệnh LIMIT và OFFSET
         int offset = (page - 1) * limit;
         int totalCount = invoiceDAO.countSearchInvoices(keyword, status);
         int totalPages = (int) Math.ceil((double) totalCount / limit);
-        if (totalPages < 1) totalPages = 1;
+        if (totalPages < 1) {
+            totalPages = 1;
+        }
 
-        // Lấy danh sách hóa đơn đã phân trang và set các attribute hiển thị
         List<Invoice> invoices = invoiceDAO.searchInvoicesPaginated(keyword, status, offset, limit);
         request.setAttribute("invoices", invoices);
         request.setAttribute("listInvoices", invoices);
@@ -74,6 +71,9 @@ public class InvoiceServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
+        if (SessionUtil.requireUser(request, response) == null) {
+            return;
+        }
         if (!CsrfUtil.isValid(request)) {
             response.sendRedirect(request.getContextPath() + "/admin/invoices?error=csrf");
             return;
@@ -86,7 +86,7 @@ public class InvoiceServlet extends HttpServlet {
         }
 
         if ("update-status".equals(action)) {
-            int id = parseInt(request.getParameter("id"));
+            int id = ValidationUtil.parseIntOrDefault(request.getParameter("id"), -1);
             String status = request.getParameter("status");
             boolean success = invoiceDAO.updateInvoiceStatus(id, status);
             response.sendRedirect(request.getContextPath() + "/admin/invoices?" + (success ? "success=updated" : "error=update_failed"));
@@ -123,7 +123,7 @@ public class InvoiceServlet extends HttpServlet {
 
     private void updateInvoice(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
-        int id = parseInt(request.getParameter("id"));
+        int id = ValidationUtil.parseIntOrDefault(request.getParameter("id"), -1);
         String customerName = request.getParameter("customerName");
         String petName = request.getParameter("petName");
         String serviceName = request.getParameter("serviceName");
@@ -145,19 +145,6 @@ public class InvoiceServlet extends HttpServlet {
         boolean success = invoiceDAO.updateInvoice(
                 id, customerName.trim(), petName.trim(), serviceName.trim(), totalAmount, status, paymentMethod);
         response.sendRedirect(request.getContextPath() + "/admin/invoices?" + (success ? "success=updated" : "error=update_failed"));
-    }
-
-    private User currentUser(HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        return session == null ? null : (User) session.getAttribute("user");
-    }
-
-    private int parseInt(String value) {
-        try {
-            return Integer.parseInt(value);
-        } catch (Exception e) {
-            return -1;
-        }
     }
 
     private BigDecimal parseAmount(String value) {

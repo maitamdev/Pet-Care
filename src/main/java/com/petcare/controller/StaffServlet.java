@@ -38,7 +38,12 @@ public class StaffServlet extends HttpServlet {
             return;
         }
         if ("/admin/staff/edit".equals(path)) {
-            request.setAttribute("staff", userDAO.getUserById(parseInt(request.getParameter("id"))));
+            User staff = userDAO.getStaffById(ValidationUtil.parseIntOrDefault(request.getParameter("id"), -1));
+            if (staff == null) {
+                response.sendRedirect(request.getContextPath() + "/admin/staff?error=notfound");
+                return;
+            }
+            request.setAttribute("staff", staff);
             request.getRequestDispatcher("/WEB-INF/views/dashboard/staff-form.jsp").forward(request, response);
             return;
         }
@@ -79,7 +84,7 @@ public class StaffServlet extends HttpServlet {
         } else {
             String password = request.getParameter("password");
             if (ValidationUtil.isEmpty(staff.getUsername()) || ValidationUtil.isEmpty(password) ||
-                    password.length() < 8 || userDAO.checkUsernameExist(staff.getUsername())) {
+                    !ValidationUtil.isValidPassword(password) || userDAO.checkUsernameExist(staff.getUsername())) {
                 response.sendRedirect(request.getContextPath() + "/admin/staff?error=invalid");
                 return;
             }

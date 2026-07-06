@@ -34,6 +34,7 @@
             </c:if>
 
             <form action="${pageContext.request.contextPath}/register" method="POST" onsubmit="return validatePasswords();">
+                <input type="hidden" name="csrfToken" value="${csrfToken}">
                 <div class="form-group">
                     <label>Họ và Tên *</label>
                     <input type="text" name="fullName" class="form-control" required placeholder="Nguyễn Văn A">
