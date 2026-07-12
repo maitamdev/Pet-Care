@@ -115,3 +115,4 @@ Pet-Care/
 ## 8. Video thuyết trình và demo
 
 > Video thuyết trình và demo sản phẩm: [Xem tại đây](video/)
+> Link video dự phòng ạ : https://drive.google.com/drive/folders/19UPymgqj1_tmYZuIgls0hc_nRl7Zjutt?usp=sharing
