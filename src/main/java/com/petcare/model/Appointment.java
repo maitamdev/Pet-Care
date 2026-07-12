@@ -8,9 +8,9 @@ public class Appointment {
     private int id;
     private int customerId;
     private int petId;
-    private Integer staffId; // Can be null
+    private Integer staffId;
     private Timestamp appointmentDate;
-    private String status; // PENDING, CONFIRMED, COMPLETED, CANCELLED
+    private String status;
     private String reason;
     private String diagnosis;
     private Timestamp createdAt;
@@ -18,20 +18,16 @@ public class Appointment {
     private String visitType;
     private String address;
 
-    // Join fields for easy display
     private String customerName;
     private String petName;
     private String staffName;
     
-    // Service Booking details (Single service for simple client booking)
     private int serviceId;
     private String serviceName;
     private BigDecimal priceAtBooking;
     
-    // Support for multiple services
     private List<Integer> selectedServiceIds;
 
-    // Getters and Setters
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 

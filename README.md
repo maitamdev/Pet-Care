@@ -64,11 +64,11 @@ PetCare Clinic là website quản lý phòng khám thú y được phát triển
 2. Import database vào MySQL:
    ```sql
    source database/petcare_db.sql;
-   source database/invoices.sql;
    ```
 
 3. Chạy project:
    
+   ```bash
    mvn tomcat7:run
    ```
 
@@ -90,28 +90,25 @@ Tài khoản Customer có thể đăng ký trực tiếp trên giao diện web.
 ```
 Pet-Care/
 ├── database/
-│   ├── petcare_db.sql          # Tạo database và dữ liệu mẫu
-│   └── invoices.sql            # Migration bảng hóa đơn
+│   └── petcare_db.sql
 ├── src/main/java/com/petcare/
-│   ├── config/                 # Cấu hình kết nối JDBC
-│   ├── controller/             # Servlet (Controller)
-│   ├── dao/                    # Data Access Object (Model)
-│   ├── filter/                 # Auth, Encoding, Security filters
-│   ├── model/                  # Java Bean (Entity)
-│   └── util/                   # Tiện ích (CSRF, Hash, Upload, ...)
+│   ├── config/
+│   ├── controller/
+│   ├── dao/
+│   ├── filter/
+│   ├── model/
+│   └── util/
 ├── src/main/webapp/
-│   ├── assets/css/             # CSS tự viết
-│   ├── assets/js/              # JavaScript
-│   ├── assets/images/          # Hình ảnh, logo
-│   ├── WEB-INF/views/          # JSP Views (auth, customer, dashboard, public)
-│   └── index.jsp               # Trang mặc định
-├── src/test/java/              # Unit Test (JUnit 5)
-├── report/                     # Báo cáo đồ án
-├── slides/                     # Slides thuyết trình
-├── video/                      # Video thuyết trình & demo
-├── setup.ps1                   # Script cài đặt tự động
-├── run.ps1                     # Script chạy ứng dụng
-├── pom.xml                     # Maven project file
+│   ├── assets/css/
+│   ├── assets/js/
+│   ├── assets/images/
+│   ├── WEB-INF/views/
+│   └── index.jsp
+├── src/test/java/
+├── report/
+├── slides/
+├── video/
+├── pom.xml
 └── README.md
 ```
 

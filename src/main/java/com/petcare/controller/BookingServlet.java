@@ -118,7 +118,6 @@ public class BookingServlet extends HttpServlet {
                 throw new ServletException("Vui lòng nhập địa chỉ khi chọn Khám tại nhà.");
             }
 
-            // Update user contact info if provided
             userDAO.updateContactInfo(user.getId(), contactName.trim(), contactPhone != null ? contactPhone.trim() : "", contactAddress != null ? contactAddress.trim() : "");
             user.setFullName(contactName.trim());
             user.setPhone(contactPhone != null ? contactPhone.trim() : "");

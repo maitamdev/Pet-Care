@@ -3,8 +3,8 @@ package com.petcare.controller;
 import com.petcare.dao.UserDAO;
 import com.petcare.model.User;
 import com.petcare.util.CsrfUtil;
-import com.petcare.util.RedirectUtil; // Redirect helper
-import com.petcare.util.SessionUtil; // Session helper
+import com.petcare.util.RedirectUtil;
+import com.petcare.util.SessionUtil;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;

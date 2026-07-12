@@ -4,7 +4,6 @@ import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
 import java.io.IOException;
 
-// Bộ lọc Filter này để bắt tất cả request gửi lên và ép kiểu mã hóa UTF-8 tiếng Việt, tránh lỗi font khi tìm kiếm.
 @WebFilter("/*")
 public class EncodingFilter implements Filter {
 

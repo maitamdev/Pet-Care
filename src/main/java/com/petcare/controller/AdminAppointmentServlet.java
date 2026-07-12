@@ -70,7 +70,6 @@ public class AdminAppointmentServlet extends HttpServlet {
             return;
         }
 
-        // Phân trang danh sách lịch hẹn khám
         int page = 1;
         int limit = 10;
         try {
@@ -83,13 +82,11 @@ public class AdminAppointmentServlet extends HttpServlet {
             page = 1;
         }
 
-        // Tính toán offset dịch chuyển cho câu truy vấn LIMIT OFFSET
         int offset = (page - 1) * limit;
         int totalCount = appointmentDAO.getAppointmentsCount();
         int totalPages = (int) Math.ceil((double) totalCount / limit);
         if (totalPages < 1) totalPages = 1;
 
-        // Gọi hàm DAO lấy danh sách lịch hẹn đã được phân trang
         List<Appointment> appointments = appointmentDAO.getAppointmentsPaginated(offset, limit);
         request.setAttribute("listAppointments", appointments);
         request.setAttribute("listStaff", userDAO.getAllStaff());

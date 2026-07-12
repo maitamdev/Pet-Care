@@ -4,7 +4,7 @@ import com.petcare.dao.InvoiceDAO;
 import com.petcare.model.Invoice;
 import com.petcare.model.User;
 import com.petcare.util.CsrfUtil;
-import com.petcare.util.SessionUtil; // Session helper
+import com.petcare.util.SessionUtil;
 import com.petcare.util.ValidationUtil;
 
 import javax.servlet.ServletException;
